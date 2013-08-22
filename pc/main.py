@@ -731,6 +731,17 @@ def get_busy_channel(channel_id):
     except:
         return False
 
+def SE_WAIT():
+    global sfx,keyboard
+    #wait until the current se is stopped or key pressed
+    if not sfx:
+        return
+    if not keyboard.is_down(key_codes.EScancode1):
+        while (not keyboard.pressed(key_codes.EScancodeSelect) and get_busy_channel(sfx['channelid']) and sfx['filename']!='' ) :
+            e32.ao_sleep(0.1)
+            e32.reset_inactivity()
+            end_time=time.clock()
+
 def SE_STA(sefilename, duration=None, times=1):
     global sfx, gameconfig
     try:
@@ -1952,14 +1963,19 @@ def read_game_config(gamefolder):
 
 def read_global_config(configfilename):
     gameconfigfile=file(configfilename,'r')
+    globalconfig={}
     while True:
         line=gameconfigfile.readline()
         if len(line)==0:
             break
         else:
-            command=line
+            command=del_blank(line)
+            if command.startswith('#'):
+                continue
+            args=command.split(',')
+            globalconfig[args[0]]=args[1]
     gameconfigfile.close()
-    return command
+    return globalconfig
 
 def write_game_config():
     global gameconfig, save
@@ -3110,7 +3126,7 @@ def load_pak_file(pakfilename):
     global GAME_PATH
     pakpath=os.path.join(GAME_PATH,pakfilename)
     if not os.path.exists(pakpath):
-        print 'No package file',pakfilename
+        print 'Files are not packaged into',pakfilename
         return None,None
     pakfile=file(pakpath,'rb')
     #read the voice file list
@@ -3384,18 +3400,22 @@ def PrefetchingPYMO():
         if command.startswith(u'#chara '):
             args=split_parameter(command,u'#chara ')
             for i in range (1,len(args)-1,4):
-                cache_add('chara',args[i],cache_pos,bak_pos)
+                if args[i]!=u'NULL':
+                    cache_add('chara',args[i],cache_pos,bak_pos)
             break
         #chara_y
         if command.startswith(u'#chara_y '):
             args=split_parameter(command,u'#chara_y ')
             for i in range (2,len(args)-1,5):
-                cache_add('chara',args[i],cache_pos,bak_pos)
+                if args[i]!=u'NULL':
+                    cache_add('chara',args[i],cache_pos,bak_pos)
             break
         #chara_scroll 5,0,SM02AMA,0,0,50,0,1,400
+        #chara_scroll 5,0,50,0,400
         if command.startswith(u'#chara_scroll '):
             args=split_parameter(command,u'#chara_scroll ')
-            cache_add('chara',args[2],cache_pos,bak_pos)
+            if len(args)==10:
+                cache_add('chara',args[2],cache_pos,bak_pos)
             break
         #vo
         if command.startswith(u'#vo '):
@@ -4258,22 +4278,30 @@ def ScriptParsePYMO():
             if command.startswith(u'#chara '):
                 args=split_parameter(command,u'#chara ')
                 for i in range (0,len(args)-1,4):
-                    CHAload(args[i],args[i+1])
-                    CHASetPos(args[i],int(args[i+2])*bgsize[0]/100)
-                    CHASetLayer(args[i],int(args[i+3]))
-                    CHASetVisible(args[i])
+                    if args[i+1]==u'NULL':
+                        CHASetInvisible(args[i])
+                        CHAResetPos(args[i])
+                    else:
+                        CHAload(args[i],args[i+1])
+                        CHASetPos(args[i],int(args[i+2])*bgsize[0]/100)
+                        CHASetLayer(args[i],int(args[i+3]))
+                        CHASetVisible(args[i])
                 CHADisp(length=int(args[len(args)-1]))
                 continue
             #chara_y 3,0,SM02AMA,25,10,1,1,SN01AMA,75,20,2,400
             if command.startswith(u'#chara_y '):
                 args=split_parameter(command,u'#chara_y ')
                 for i in range (1,len(args)-1,5):
-                    if not save[u'chara'].has_key(args[i]):
-                        save[u'chara'][args[i]]={}
-                    CHAload(args[i],args[i+1])
-                    CHASetPos(args[i],int(args[i+2])*bgsize[0]/100,int(args[i+3])*bgsize[1]/100,int(args[0]))
-                    CHASetLayer(args[i],int(args[i+4]))
-                    CHASetVisible(args[i])
+                    if args[i+1]==u'NULL':
+                        CHASetInvisible(args[i])
+                        CHAResetPos(args[i])
+                    else:
+                        if not save[u'chara'].has_key(args[i]):
+                            save[u'chara'][args[i]]={}
+                        CHAload(args[i],args[i+1])
+                        CHASetPos(args[i],int(args[i+2])*bgsize[0]/100,int(args[i+3])*bgsize[1]/100,int(args[0]))
+                        CHASetLayer(args[i],int(args[i+4]))
+                        CHASetVisible(args[i])
                 CHADisp(length=int(args[len(args)-1]))
                 continue
             #chara_scroll 5,0,SM02AMA,0,0,50,0,130,1,400
@@ -4494,6 +4522,10 @@ def ScriptParsePYMO():
             if command.startswith(u'#wait '):
                 wait(float(del_blank(command[6:])))
                 continue
+            #wait_se
+            if command.startswith(u'#wait_se'):
+                SE_WAIT()
+                continue
             #call KAO
             if command.startswith(u'#call '):
                 args=split_parameter(command,u'#call ')
@@ -4639,7 +4671,7 @@ def main(windowsize=None):
     f=None
     quitbind=True
     autosave=0
-    engineversion=0.9
+    engineversion=1.0
     gameconfig={u'font':1,u'fontaa':1,u'grayselected':1,u'hint':1,u'textspeed':3,u'textcolor':(255,255,255),u'cgprefix':u'EV_',u'vovolume':0,u'bgmvolume':0,u'msgtb':(6,0),u'msglr':(10,7),u'anime':1,u'platform':'pygame'}
     gameconfigbak={}
     GAME_PATH=None
@@ -4647,11 +4679,8 @@ def main(windowsize=None):
     #find LOG_PATH
     if android:
         if os.path.exists('globalconfig.txt'):
-            paths=read_global_config('globalconfig.txt')
-            if os.path.exists(os.path.join(paths,'Python')):
-                paths=os.path.join(paths,'Python')
-            elif os.path.exists(os.path.join(paths,'python')):
-                paths=os.path.join(paths,'python')
+            globalconfig=read_global_config('globalconfig.txt')
+            paths=globalconfig['last_path']
         else:
             paths='/mnt/sdcard'
     else:
@@ -4698,61 +4727,58 @@ def main(windowsize=None):
         # ####################
         # edit here
         # ####################
-        gamelist=[]
-        gametextlist=[]
-        gameiconlist=[]
-        for root, dirs, files in os.walk(paths):
-            for filename in files:
-                if filename.lower()=='gameconfig.txt':
-                    try:
-                        game_info=read_game_info(root)
-                        gamelist.append(game_info[0])
-                        gametextlist.append(game_info[1])
-                        gameiconlist.append(load_image(os.path.join(game_info[0],'icon.png'),is_alpha=True, imgtype='bg'))
-                    except:
-                        query(stringres[u'WARNING'],os.path.join(root, filename)+stringres[u'IS_BROKEN'],[stringres[u'OK']])
-                        error_log("Warning: "+os.path.join(root, filename)+' is corrupted!')
-        if len(gamelist)<1:
-            if android:
-                query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND_ANDROID'],[stringres[u'OK']])
-            else:
-                query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND'],[stringres[u'OK']])
-            error_log('Error: No game found! Exit...')
-            return
-
+        
         keyboard=Keyboard()
-        #display game launcher to select a game
-        gamelauncher=SelectList(gametextlist,iconlist=gameiconlist)
-        gameid=gamelauncher.select()
-        if gameid==-1:
-            pygame.quit()
-            return
-        del gameiconlist
-        del gametextlist
-        del gamelauncher
-
-        #read the selected game config
-        try:
-            read_game_config(gamelist[gameid])
-        except:
-            query(stringres[u'ERROR'],gamelist[gameid]+'/gameconfig.txt '+stringres[u'IS_BROKEN'],[stringres[u'OK']])
-            error_log("Error: "+ gamelist[gameid]+'/gameconfig.txt '+'is corrupted')
-            pygame.quit()
-            return
         if android:
-            #remove the log file in SD card's root dir
-            try:
-                os.remove(LOG_PATH)
-            except:
-                pass
-            LOG_PATH=os.path.join(gamelist[gameid],'pymo.log')
+            GAME_PATH=paths
             #see if game folder allows write
             try:
                 tempfile=file(LOG_PATH,'w')
                 tempfile.close()
             except IOError:
                 query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
-        GAME_PATH=gamelist[gameid]#.decode('gbk')
+        else:
+            gamelist=[]
+            gametextlist=[]
+            gameiconlist=[]
+            for root, dirs, files in os.walk(paths):
+                for filename in files:
+                    if filename.lower()=='gameconfig.txt':
+                        try:
+                            game_info=read_game_info(root)
+                            gamelist.append(game_info[0])
+                            gametextlist.append(game_info[1])
+                            gameiconlist.append(load_image(os.path.join(game_info[0],'icon.png'),is_alpha=True, imgtype='bg'))
+                        except:
+                            query(stringres[u'WARNING'],os.path.join(root, filename)+stringres[u'IS_BROKEN'],[stringres[u'OK']])
+                            error_log("Warning: "+os.path.join(root, filename)+' is corrupted!')
+            if len(gamelist)<1:
+                if android:
+                    query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND_ANDROID'],[stringres[u'OK']])
+                else:
+                    query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND'],[stringres[u'OK']])
+                error_log('Error: No game found! Exit...')
+                return
+
+            #display game launcher to select a game
+            gamelauncher=SelectList(gametextlist,iconlist=gameiconlist)
+            gameid=gamelauncher.select()
+            if gameid==-1:
+                pygame.quit()
+                return
+            del gameiconlist
+            del gametextlist
+            del gamelauncher
+            GAME_PATH=gamelist[gameid]#.decode('gbk')
+
+        #read the selected game config
+        try:
+            read_game_config(GAME_PATH)
+        except:
+            query(stringres[u'ERROR'],gamelist[gameid]+'/gameconfig.txt '+stringres[u'IS_BROKEN'],[stringres[u'OK']])
+            error_log("Error: "+ gamelist[gameid]+'/gameconfig.txt '+'is corrupted')
+            pygame.quit()
+            return
         chara_on=False
         if gameconfig.has_key(u'engineversion'):
             if float(gameconfig[u'engineversion'])>engineversion:
