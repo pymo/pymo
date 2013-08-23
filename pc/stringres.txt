@@ -10,9 +10,9 @@ ON,开启
 OFF,关闭
 SAVE,存档
 DONT_SAVE,不存档 
-READ_ONLY,游戏所在目录没有写入权限，可能造成游戏资源无法解压、无法存档等错误。请将游戏放置于有写入权限的目录内。
+READ_ONLY,游戏所在目录没有写入权限，可能造成游戏资源无法解压、无法存档等错误。请将游戏放在有写入权限的目录内。
 VERSION_LOW_1,运行这个游戏需要pymo 
-VERSION_LOW_2,或以上版本。请访问www.yayabo.cn下载最新版本。
+VERSION_LOW_2,或以上版本。请访问pymo.github.io下载最新版本。
 SCRIPT_ERROR_1,在执行脚本
 SCRIPT_ERROR_2,第
 SCRIPT_ERROR_3,行时
@@ -59,4 +59,4 @@ CONFIGFORM_PREFETCH,资源预取功能（高级）
 GAME_SEARCHING,正在搜索游戏
 GAME_NOTFOUND,没有找到游戏，退出...
 GAME_NOTFOUND_ANDROID,没有找到游戏。请将游戏放置在内置闪存或SD卡上的Python文件夹下。\n按确定退出...
-CAN_NOT_FIND,找不到图片\n
+CAN_NOT_FIND,找不到文件\n

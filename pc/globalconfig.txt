@@ -1,0 +1,5 @@
+﻿last_path,./
+executed_time,0
+original_ratio,0
+keypad_extend,0
+keypad_horizontal,1

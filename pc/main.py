@@ -17,7 +17,7 @@ KMdaRepeatForever=0
 
 class Keyboard(object):
     def __init__(self):
-        global staticimg,screensize
+        global staticimg,screensize,globalconfig
         self._keyboard_state={}
         self._downs={}
         self._last_pos=(0,0)
@@ -25,8 +25,17 @@ class Keyboard(object):
         self._pen_up=False
         keypadsize = staticimg['keypad'].get_size()
         self.keyrects=[]
-        for i in range(0,7):
-            self.keyrects.append((screensize[0],int(screensize[1]*i/7),screensize[0]+keypadsize[0],int(screensize[1]*(i+1)/7)))
+        if globalconfig['keypad_bottom']==0:
+            if globalconfig['keypad_num']==7:
+                self.button_codes=[pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+            else:
+                self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+            for i in range(0,globalconfig['keypad_num']):
+                self.keyrects.append((screensize[0],int(screensize[1]*i/globalconfig['keypad_num']),screensize[0]+keypadsize[0],int(screensize[1]*(i+1)/globalconfig['keypad_num'])))
+        else:
+            self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+            for i in range(0,globalconfig['keypad_num']):
+                self.keyrects.append((int(screensize[0]*i/globalconfig['keypad_num']),screensize[1],int(screensize[0]*(i+1)/globalconfig['keypad_num']),screensize[1]+keypadsize[1]))
     def key_map(self, scancode):
         if scancode==key_codes.EScancodeSelect:
             return [key_codes.EScancodeSelect,key_codes.EScancode5, pygame.K_RETURN, pygame.K_SPACE]
@@ -93,9 +102,7 @@ class Keyboard(object):
                         self.handle_down(pygame.K_ESCAPE)
             elif ev.type == pygame.MOUSEBUTTONUP:
                 if ev.button==1:
-                    if staticimg['keypad']:
-                        canvas.blit(staticimg['keypad'], (screensize[0],0))
-                        pygame.display.flip()
+                    update_screen()
                     self.handle_up(self.pos_to_key(ev.pos))
                     if not quitbind:
                         self._last_pos=ev.pos
@@ -151,11 +158,10 @@ class Keyboard(object):
         self._keyboard_state={}
     def pos_to_key(self,pos):
         global quitbind
-        button_codes=[pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
         for i in range(0,len(self.keyrects)):
             keyrect=self.keyrects[i]
             if pos[0]>keyrect[0] and pos[0]<keyrect[2] and pos[1]>keyrect[1] and pos[1]<keyrect[3]:
-                return button_codes[i]
+                return self.button_codes[i]
         if quitbind:
             return pygame.K_SPACE
         else:
@@ -165,7 +171,7 @@ class Keyboard(object):
         for i in range(0,len(self.keyrects)):
             keyrect=self.keyrects[i]
             if pos[0]>keyrect[0] and pos[0]<keyrect[2] and pos[1]>keyrect[1] and pos[1]<keyrect[3]:
-                canvas.fill((200,200,0), (keyrect[0],keyrect[1],keyrect[2]-keyrect[0],keyrect[3]-keyrect[1]))
+                canvas.fill((128,128,128), (keyrect[0],keyrect[1],keyrect[2]-keyrect[0],keyrect[3]-keyrect[1]))
                 pygame.display.flip()
                 return True
         return False
@@ -295,7 +301,7 @@ class Checkbox(object):
             surface.blit(self.check, (self.rect[0]+(self.rect[2]-self.check.get_size()[0])/2, self.rect[1]+(self.rect[3]-self.check.get_size()[1])/2))
 
 def ConfigForm():
-    global final_img,staticimg,gameconfig,keyboard
+    global final_img,staticimg,gameconfig,keyboard,screensize
     modify_game_config(False)
     controls={'fontsize':Slider((49,15,42,7),(36,15,7,7),(10,30),gameconfig['fontsize']),
               'textspeed':Slider((49,29,42,7),(36,29,7,7),(0,5),gameconfig[u'textspeed']),
@@ -327,6 +333,9 @@ def ConfigForm():
                     break
             elif ev.type == pygame.MOUSEBUTTONDOWN:
                 if ev.button==1:
+                    if ev.pos[0]>screensize[0] or ev.pos[1]>screensize[1]:
+                        looping=False
+                        break
                     for name in controls:
                         if controls[name].inrange(ev.pos):
                             controls[name].activate()
@@ -354,13 +363,16 @@ def ConfigForm():
     keyboard.clear_downs()
 
 def update_screen():
-    global final_img, canvas, screensize, anime, staticimg
+    global final_img, canvas, screensize, anime, staticimg, globalconfig
     if anime.ison():
         anime.redraw()
     else:
         canvas.blit(final_img,(0,0))
     if staticimg['keypad']:
-        canvas.blit(staticimg['keypad'], (screensize[0],0))
+        if globalconfig['keypad_bottom']==0:
+            canvas.blit(staticimg['keypad'], (screensize[0],0))
+        else:
+            canvas.blit(staticimg['keypad'], (0,screensize[1]))
     pygame.display.flip()
 
 def draw_text(char_list,text_origin=(0,0),color=(255,255,255),on_canvas=True, on_final_img=True):
@@ -370,7 +382,11 @@ def draw_text(char_list,text_origin=(0,0),color=(255,255,255),on_canvas=True, on
     try:
         text = textfont.render(char_list, gameconfig[u'fontaa'], color)
         if bool(gameconfig[u'font']):
-            base = textfont.render(char_list, gameconfig[u'fontaa'], (255-color[0],255-color[1],255-color[2]))
+            if (color[0]+color[1]+color[2]<256):#dark text, white shadow
+                basecolor=(255,255,255)
+            else:
+                basecolor=(0,0,0)
+            base = textfont.render(char_list, gameconfig[u'fontaa'], basecolor)
             offset=max(1,int(gameconfig[u'fontsize']/16))
             base_origin=(text_origin[0]+offset,text_origin[1]+offset)
         if on_final_img:
@@ -411,10 +427,10 @@ def display_cursor(cursororigin, wait_for_vo=False):
     temp_img=pygame.Surface(back_img.get_size())
     e32.ao_yield()
     i=0
-#    if gameconfig[u'prefetching']:
-#        Prefetching()
-#        if (vo!=None and mixer.get_busy()):
-#            Prefetching()
+    if gameconfig[u'prefetching']:
+        Prefetching()
+        if (vo!=None and get_busy_channel(vo)):
+            Prefetching()
     while running:
         if keyboard.pressed(key_codes.EScancodeSelect) or keyboard.pressed(key_codes.EScancode1):
             break
@@ -500,6 +516,87 @@ def get_image_height(img):
 def get_image_size(img):
     return img.get_size()
 
+def load_keypad(autoon=False):
+    global screensize,globalconfig,staticimg,gameconfig
+    greycolor=(128,128,128)
+    if android:
+        if globalconfig['keypad_extend']==1:
+            globalconfig['keypad_num']=9
+        else:
+            globalconfig['keypad_num']=7
+        if gameconfig.has_key(u'imagesize'):
+            displayinfo=pygame.display.Info()
+            if globalconfig['keypad_horizontal']==1 and (displayinfo.current_h-displayinfo.current_w*gameconfig[u'imagesize'][1]/gameconfig[u'imagesize'][0] > displayinfo.current_w/9):
+                globalconfig['keypad_bottom']=1
+                globalconfig['keypad_num']=9
+                if globalconfig['original_ratio']==1:
+                    keypad_thickness=displayinfo.current_h-displayinfo.current_w*gameconfig[u'imagesize'][1]/gameconfig[u'imagesize'][0]
+                else:
+                    keypad_thickness=displayinfo.current_w/globalconfig['keypad_num']
+            else:
+                globalconfig['keypad_bottom']=0
+                if globalconfig['original_ratio']==1:
+                    keypad_thickness=max( displayinfo.current_h/globalconfig['keypad_num'], displayinfo.current_w-displayinfo.current_h*gameconfig[u'imagesize'][0]/gameconfig[u'imagesize'][1] )
+                else:
+                    keypad_thickness=displayinfo.current_h/globalconfig['keypad_num']
+        else:
+            globalconfig['keypad_bottom']=0
+            keypad_thickness=screensize[1]/globalconfig['keypad_num']
+    else:
+        globalconfig['keypad_bottom']=0
+        globalconfig['keypad_num']=9
+        keypad_thickness=screensize[1]/globalconfig['keypad_num']
+    #calculate keypad size
+    if globalconfig['keypad_bottom']==0:
+        if globalconfig['keypad_num']==7:
+            tempimg=load_image("keypad1.png", width=None, height=screensize[1], is_alpha=True)
+        else:
+            tempimg=load_image("keypad2.png", width=None, height=screensize[1], is_alpha=True)
+        staticimg['keypad']=pygame.Surface((keypad_thickness,screensize[1]))
+        staticimg['keypad'].fill((0,0,0))
+        if autoon:
+            staticimg['keypad'].fill(greycolor,(0,(globalconfig['keypad_num']-6)*screensize[1]/globalconfig['keypad_num'],get_image_width(staticimg['keypad']),screensize[1]/globalconfig['keypad_num']))
+        for i in range(1,globalconfig['keypad_num']):
+            pygame.draw.line(staticimg['keypad'],(255,255,255),(0,i*screensize[1]/globalconfig['keypad_num']),(get_image_width(staticimg['keypad']),i*screensize[1]/globalconfig['keypad_num']),1)
+        staticimg['keypad'].blit(tempimg,((keypad_thickness-get_image_width(tempimg))/2,0))
+    else:
+        tempimg=load_image("keypad3.png", width=screensize[0], height=None, is_alpha=True)
+        staticimg['keypad']=pygame.Surface((screensize[0],keypad_thickness))
+        staticimg['keypad'].fill((0,0,0))
+        if autoon:
+            staticimg['keypad'].fill(greycolor,(3*screensize[0]/globalconfig['keypad_num'],0,screensize[0]/globalconfig['keypad_num'],get_image_height(staticimg['keypad'])))
+        for i in range(1,globalconfig['keypad_num']):
+            pygame.draw.line(staticimg['keypad'],(255,255,255),(i*screensize[0]/globalconfig['keypad_num'],0),(i*screensize[0]/globalconfig['keypad_num'],get_image_height(staticimg['keypad'])),1)
+        staticimg['keypad'].blit(tempimg,(0,(keypad_thickness-get_image_height(tempimg))/2))
+
+def load_select_image(filename,seqlen):
+    selectimg=load_image(os.path.join(GAME_PATH,'system',filename+'.png'), is_alpha=True)
+    imagelist=[]
+    for i in range(0,seqlen):
+        tempimg=pygame.Surface((get_image_width(selectimg)/2,get_image_height(selectimg)/seqlen),flags=pygame.SRCALPHA)
+        tempimg.blit(selectimg,(0,0), (
+            (0,i*get_image_height(selectimg)/seqlen),
+            (get_image_width(selectimg)/2,get_image_height(selectimg)/seqlen) ) )
+        highlightimg=pygame.Surface((get_image_width(selectimg)/2,get_image_height(selectimg)/seqlen),flags=pygame.SRCALPHA)
+        highlightimg.blit(selectimg,(0,0), (
+            (get_image_width(selectimg)/2,i*get_image_height(selectimg)/seqlen),
+            (get_image_width(selectimg),get_image_height(selectimg)/seqlen) ) )
+        imagelist.append(tempimg)
+        imagelist.append(highlightimg)
+    return imagelist
+    
+def load_select_images(filenamelist):
+    imagelist=[]
+    for filename in filenamelist:
+        selectimg=load_image(os.path.join(GAME_PATH,'system',filename+'.png'), is_alpha=True)
+        tempimg=pygame.Surface((get_image_width(selectimg)/2,get_image_height(selectimg)),flags=pygame.SRCALPHA)
+        tempimg.blit(selectimg,(0,0), ( (0,0),(get_image_width(selectimg)/2,get_image_height(selectimg)) ) )
+        highlightimg=pygame.Surface((get_image_width(selectimg)/2,get_image_height(selectimg)),flags=pygame.SRCALPHA)
+        highlightimg.blit(selectimg,(0,0), ( (get_image_width(selectimg)/2,0),(get_image_width(selectimg)/2,get_image_height(selectimg)) ) )
+        imagelist.append(tempimg)
+        imagelist.append(highlightimg)
+    return imagelist
+
 def load_image(imgfilename, width=None, height=None, is_alpha=False, imgtype='chara'):
     global screensize,scalemode,scaleratio,gameconfig
     if not os.path.exists(imgfilename):
@@ -564,8 +661,14 @@ def BGLoad(bgindex,bgfilename,percentorig=(0,0)):
     global cache, save, gameconfig, final_img, bgorigin, screensize, staticimg
     if not save.has_key(u'bg') or save[u'bg']!=bgfilename:
         save[u'bg']=bgfilename
-        unpack_file(bgfilename,u'bgformat')
-        staticimg['bg']=load_image(os.path.join(GAME_PATH,'bg',bgfilename+gameconfig[u'bgformat']),imgtype='bg')
+        if cache['bg'].has_key(bgfilename):
+            staticimg['bg']=cache['bg'][bgfilename]['res']
+            cache['bg'][bgfilename]['usetime']-=1
+            if cache['bg'][bgfilename]['usetime']==0:
+                del cache['bg'][bgfilename]
+        else:
+            unpack_file(bgfilename,u'bgformat')
+            staticimg['bg']=load_image(os.path.join(GAME_PATH,'bg',bgfilename+gameconfig[u'bgformat']),imgtype='bg')
     save[u'bgpercentorig']=percentorig
     if percentorig!=(0,0):
         bgorigin=( -percentorig[0]*get_image_width(staticimg['bg'])/100 , -percentorig[1]*get_image_height(staticimg['bg'])/100 )
@@ -573,7 +676,7 @@ def BGLoad(bgindex,bgfilename,percentorig=(0,0)):
         bgorigin=((screensize[0]-get_image_width(staticimg['bg']))/2, (screensize[1]-get_image_height(staticimg['bg']))/2)
 
 def MASK(length, new_img, mask_img, img_origin=(0,0)):
-    global final_img, keyboard, staticimg, in_fade_out
+    global final_img, keyboard, staticimg, in_fade_out, bgorigin
     if keyboard.is_down(key_codes.EScancode1) or length<20 or in_fade_out:
         draw_image(new_img,img_origin=img_origin,on_canvas=not in_fade_out)
         e32.ao_yield()
@@ -581,13 +684,14 @@ def MASK(length, new_img, mask_img, img_origin=(0,0)):
     else:
         length=float(length)/2000.0
     staticimg['oldimg'].blit(final_img,(0,0))
+    maskorigin=((screensize[0]-get_image_width(mask_img))/2, (screensize[1]-get_image_height(mask_img))/2)
     #oldimg to mask
     start_time=time.clock()
     current_time=start_time
     while (current_time-start_time)<length:
         level=int(255*(current_time-start_time)/length)
         staticimg['tempimg'].fill((level,level,level))
-        staticimg['tempimg'].blit(mask_img, (0,0), None, pygame.BLEND_MIN)
+        staticimg['tempimg'].blit(mask_img, maskorigin, None, pygame.BLEND_MIN)
         final_img.blit(staticimg['oldimg'], (0,0))
         final_img.blit(staticimg['tempimg'], (0,0), None, pygame.BLEND_SUB)
         update_screen()
@@ -598,7 +702,7 @@ def MASK(length, new_img, mask_img, img_origin=(0,0)):
     while (current_time-start_time)<length:
         level=int(255*(current_time-start_time)/length)
         staticimg['tempimg'].fill((level,level,level))
-        staticimg['tempimg'].blit(mask_img, (0,0), None, pygame.BLEND_MAX)
+        staticimg['tempimg'].blit(mask_img, maskorigin, None, pygame.BLEND_MAX)
         final_img.blit(staticimg['oldimg'], (0,0))
         final_img.blit(staticimg['tempimg'], (0,0), None, pygame.BLEND_SUB)
         update_screen()
@@ -609,8 +713,8 @@ def MASK(length, new_img, mask_img, img_origin=(0,0)):
     while (current_time-start_time)<length:
         level=255-int(255*(current_time-start_time)/length)
         staticimg['tempimg'].fill((level,level,level))
-        staticimg['tempimg'].blit(mask_img, (0,0), None, pygame.BLEND_MAX)
-        final_img.blit(new_img, (0,0))
+        staticimg['tempimg'].blit(mask_img, maskorigin, None, pygame.BLEND_MAX)
+        final_img.blit(new_img, img_origin)
         final_img.blit(staticimg['tempimg'], (0,0), None, pygame.BLEND_SUB)
         update_screen()
         current_time=time.clock()
@@ -620,8 +724,8 @@ def MASK(length, new_img, mask_img, img_origin=(0,0)):
     while (current_time-start_time)<length:
         level=255-int(255*(current_time-start_time)/length)
         staticimg['tempimg'].fill((level,level,level))
-        staticimg['tempimg'].blit(mask_img, (0,0), None, pygame.BLEND_MIN)
-        final_img.blit(new_img, (0,0))
+        staticimg['tempimg'].blit(mask_img, maskorigin, None, pygame.BLEND_MIN)
+        final_img.blit(new_img, img_origin)
         final_img.blit(staticimg['tempimg'], (0,0), None, pygame.BLEND_SUB)
         update_screen()
         current_time=time.clock()
@@ -679,7 +783,7 @@ def BGMPlay(bgmfilename,playtime=0):
     try:
         if mixer.music.get_busy():
             mixer.music.stop()
-        bgmlowername=bgmfilename.lower()
+        bgmlowername=bgmfilename #.lower()
         save[u'bgm']=bgmlowername
         bgm_path=os.path.join(GAME_PATH,'bgm',bgmlowername+gameconfig[u'bgmformat'])
         #if type(bgm_path)==unicode:
@@ -771,20 +875,26 @@ def SE_STP():
         print 'Error while stopping se file'
 
 def VO_STA(vofilename):
-    global vo,keyboard,gameconfig
+    global vo,keyboard,gameconfig,cache
     try:
         if not keyboard.is_down(key_codes.EScancode1):
             vofilename=vofilename.upper()
             purge_voice()
-            unpack_file(vofilename,u'voiceformat')
-            vopath=os.path.join(GAME_PATH,'voice',vofilename+gameconfig[u'voiceformat'])
-            #if type(vopath)==unicode:
-            #    vopath=vopath.encode('gbk')
-            if not os.path.exists(vopath):
-                print 'Can not find voice file'
-                return
-            stop_channel(vo)
-            vosound=mixer.Sound(vopath)
+            if cache['vo'].has_key(vofilename):
+                vosound=cache['vo'][vofilename]['res']
+                cache['vo'][vofilename]['usetime']-=1
+                if cache['vo'][vofilename]['usetime']==0:
+                    del cache['vo'][vofilename]
+            else:
+                unpack_file(vofilename,u'voiceformat')
+                vopath=os.path.join(GAME_PATH,'voice',vofilename+gameconfig[u'voiceformat'])
+                #if type(vopath)==unicode:
+                #    vopath=vopath.encode('gbk')
+                if not os.path.exists(vopath):
+                    print 'Can not find voice file'
+                    return
+                stop_channel(vo)
+                vosound=mixer.Sound(vopath)
             vo=vosound.play()
     except:
         print 'Error while playing voice file'
@@ -802,6 +912,7 @@ def PlayMovie(videofilename):
             android.play_video(videopath)
         except:
             print 'Error while playing video file'
+        update_screen()
 
 def Select(choices, hint=u'HINT_NONE'):
     global keyboard, final_img, gameconfig, textfont, cache, f, screensize
@@ -823,7 +934,7 @@ def unbind_quit():
     quitbind=False
 
 def query(title_text,text,buttons):
-    global final_img,staticimg,screensize
+    global final_img,staticimg,screensize,gameconfig
     staticimg['oldimg'].blit(final_img,(0,0))
     queryimg=load_image('dialog.png', width=screensize[0]*7/10, is_alpha=True)
     queryimgsize=queryimg.get_size()
@@ -891,7 +1002,7 @@ def modify_game_config(tobak=True):
         gameconfigbak[u'nameboxorig']=gameconfig[u'nameboxorig']
         #modify gameconfig
         gameconfig[u'platform']=u'pygame'
-        gameconfig[u'prefetching']=0
+        gameconfig[u'prefetching']=1
         gameconfig[u'fontsize']=gameconfig[u'fontsize']*screensize[1]/360
         gameconfig[u'msgtb']=(gameconfig[u'msgtb'][0]*screensize[1]/360, gameconfig[u'msgtb'][1]*screensize[1]/360)
         gameconfig[u'msglr']=(gameconfig[u'msglr'][0]*screensize[0]/540, gameconfig[u'msglr'][1]*screensize[0]/540)
@@ -924,6 +1035,36 @@ def create_nomedia(folder):
     except:
         pass
 
+def cache_add_sel(choices,hint,cache_pos,bak_pos):
+    return
+
+def cache_add(type,filename,cache_pos,bak_pos):
+    global cache, gameconfig
+    if cache[type].has_key(filename):
+        cache[type][filename]['cache_pos']=cache_pos
+        cache[type][filename]['usetime']+=1
+    else:
+        if type=='bg':
+            unpack_file(filename,u'bgformat')
+            temp_bg=load_image(os.path.join(GAME_PATH,'bg',filename+gameconfig[u'bgformat']))
+            cache[type][filename]={'res':temp_bg, 'cache_pos':cache_pos, 'usetime':1}
+        if type=='chara':
+            unpack_file(filename,u'charaformat')
+            temp_chara=load_image(os.path.join(GAME_PATH,'chara',filename+gameconfig[u'charaformat']),is_alpha=True)
+            cache[type][filename]={'res':temp_chara, 'cache_pos':cache_pos, 'usetime':1}
+        if type=='vo':
+            filename=filename.upper()
+            unpack_file(filename,u'voiceformat')
+            if not os.path.exists(os.path.join(GAME_PATH,'voice',filename+gameconfig[u'voiceformat'])):
+                print 'Can not find voice file',filename
+                return
+            try:
+                temp_vo=mixer.Sound(os.path.join(GAME_PATH,'voice',filename+gameconfig[u'voiceformat']))
+                cache[type][filename]={'res':temp_vo, 'cache_pos':cache_pos, 'usetime':1}
+            except:
+                pass
+        if type=='bgm':
+            pass
 
 #=========================================================
 #                Platform half-independent code
@@ -1274,17 +1415,14 @@ class SelectList(object):
         bind_quit()
         return self.startpos+self.highlightpos
 
-
 class SelectImg(object):
-    def __init__(self,filename,dstoriginlist,varlist=None,init_highlight=0):
+    def __init__(self,imagelist,dstoriginlist,varlist=None,init_highlight=0):
         global final_img
         if gameconfig[u'platform']==u'pygame':
             self.oldimg=pygame.Surface(final_img.get_size())
-            self.selectimg=load_image(os.path.join(GAME_PATH,'system',filename+'.png'), is_alpha=True)
         else:
             self.oldimg=Image.new(final_img.size)
-            self.selectimg=load_image(GAME_PATH+u'system\\'+filename+'.png')
-            self.selectimg_mask=load_image(GAME_PATH+u'system\\'+filename+'_mask.png', is_mask=True)
+        self.imagelist=imagelist
         self.varlist=varlist
         self.highlightpos=init_highlight
         self.seqlen=len(dstoriginlist)
@@ -1298,25 +1436,11 @@ class SelectImg(object):
         else:
             self.menuenable=False
         for i in range(0, self.seqlen):
-            if gameconfig[u'platform']==u'pygame':
-                self.source_range.append((
-                    (0,i*get_image_height(self.selectimg)/self.seqlen),
-                    (get_image_width(self.selectimg)/2,get_image_height(self.selectimg)/self.seqlen) ))
-                self.source_range_selected.append((
-                    (get_image_width(self.selectimg)/2,i*get_image_height(self.selectimg)/self.seqlen),
-                    (get_image_width(self.selectimg),get_image_height(self.selectimg)/self.seqlen) ))
-            else:
-                self.source_range.append((
-                    (0,i*get_image_height(self.selectimg)/self.seqlen),
-                    (get_image_width(self.selectimg)/2,(i+1)*get_image_height(self.selectimg)/self.seqlen) ))
-                self.source_range_selected.append((
-                    (get_image_width(self.selectimg)/2,i*get_image_height(self.selectimg)/self.seqlen),
-                    (get_image_width(self.selectimg),(i+1)*get_image_height(self.selectimg)/self.seqlen) ))
-            self.dstoriginlist.append((dstoriginlist[i][0]-get_image_width(self.selectimg)/4,dstoriginlist[i][1]-get_image_height(self.selectimg)/self.seqlen/2))
-            self.dstarealist.append((dstoriginlist[i][0]-get_image_width(self.selectimg)/4,
-                                     dstoriginlist[i][1]-get_image_height(self.selectimg)/self.seqlen/2,
-                                     dstoriginlist[i][0]+get_image_width(self.selectimg)/4,
-                                     dstoriginlist[i][1]+get_image_height(self.selectimg)/self.seqlen/2))
+            self.dstoriginlist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[2*i])/2,dstoriginlist[i][1]-get_image_height(self.imagelist[2*i])/2))
+            self.dstarealist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[2*i])/2,
+                                     dstoriginlist[i][1]-get_image_height(self.imagelist[2*i])/2,
+                                     dstoriginlist[i][0]+get_image_width(self.imagelist[2*i])/2,
+                                     dstoriginlist[i][1]+get_image_height(self.imagelist[2*i])/2))
             havetrue=havetrue or varlist[i]
         if not havetrue:
             for i in range(0, self.seqlen):
@@ -1329,17 +1453,17 @@ class SelectImg(object):
             for i in range(0,self.seqlen):
                 if self.varlist[i]:
                     if self.highlightpos==i:
-                        final_img.blit(self.selectimg,self.dstoriginlist[i], self.source_range_selected[i])
+                        final_img.blit(self.imagelist[2*i+1],self.dstoriginlist[i])
                     else:
-                        final_img.blit(self.selectimg,self.dstoriginlist[i], self.source_range[i])
+                        final_img.blit(self.imagelist[2*i],self.dstoriginlist[i])
         else:
             final_img.blit(self.oldimg)
             for i in range(0,self.seqlen):
                 if self.varlist[i]:
                     if self.highlightpos==i:
-                        final_img.blit(self.selectimg,target=self.dstoriginlist[i], source=self.source_range_selected[i], mask=self.selectimg_mask, scale=0)
+                        final_img.blit(self.imagelist[4*i+2], target=self.dstoriginlist[i], mask=self.imagelist[4*i+3], scale=0)
                     else:
-                        final_img.blit(self.selectimg,target=self.dstoriginlist[i], source=self.source_range[i], mask=self.selectimg_mask, scale=0)
+                        final_img.blit(self.imagelist[4*i], target=self.dstoriginlist[i], mask=self.imagelist[4*i+1], scale=0)
         update_screen()
 
     def select(self):
@@ -1963,19 +2087,22 @@ def read_game_config(gamefolder):
 
 def read_global_config(configfilename):
     gameconfigfile=file(configfilename,'r')
-    globalconfig={}
+    retdict={}
     while True:
         line=gameconfigfile.readline()
         if len(line)==0:
             break
+        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
+            command=del_blank(line[3:].decode('utf8'))
         else:
-            command=del_blank(line)
-            if command.startswith('#'):
-                continue
-            args=command.split(',')
-            globalconfig[args[0]]=args[1]
+            command=del_blank(line.decode('utf8'))
+        args=command.split(',')
+        if args[0]==u'last_path':
+            retdict[args[0]]=args[1]
+        else:
+            retdict[args[0]]=int(args[1])
     gameconfigfile.close()
-    return globalconfig
+    return retdict
 
 def write_game_config():
     global gameconfig, save
@@ -1987,7 +2114,7 @@ def write_game_config():
             gameconfigfile.write((entry+','+gameconfig[entry]+'\r\n').encode('utf8'))
         elif entrytype==tuple:
             if entry==u'textcolor':
-                gameconfigfile.write((entry+',#'+hex(gameconfig[entry][0]*256*256+gameconfig[entry][1]*256+gameconfig[entry][2])[2:]+'\n').encode('utf8'))
+                gameconfigfile.write((entry+',#'+hex(gameconfig[entry][0]*256*256+gameconfig[entry][1]*256+gameconfig[entry][2])[2:]+'\r\n').encode('utf8'))
             else:
                 gameconfigfile.write((entry+','+str(gameconfig[entry][0])+','+str(gameconfig[entry][1])+'\r\n').encode('utf8'))
         elif entrytype==int:
@@ -3042,9 +3169,9 @@ def Auto_Play(pos=(0,0)):
     global auto_play,staticimg,screensize
     auto_play=not auto_play
     if auto_play:
-        staticimg['keypad'] = load_image("keypad_autoon.png", width=None, height=screensize[1], is_alpha=False)
+        load_keypad(autoon=True)
     else:
-        staticimg['keypad'] = load_image("keypad.png", width=None, height=screensize[1], is_alpha=False)
+        load_keypad(autoon=False)
 
 def unpack_file(filename, filetype):
     global voindex,vopakfile,seindex,sepakfile,bgindex,bgpakfile,charaindex,charapakfile,GAME_PATH, gameconfig
@@ -3130,7 +3257,7 @@ def load_pak_file(pakfilename):
         return None,None
     pakfile=file(pakpath,'rb')
     #read the voice file list
-    filecount=struct.unpack('i',pakfile.read(4))[0]
+    filecount=struct.unpack('I',pakfile.read(4))[0]
     fileindex={}
     i=0
     while i< filecount:
@@ -3139,8 +3266,8 @@ def load_pak_file(pakfilename):
             filename=rawname.decode('gbk')
         except:
             filename=rawname
-        fileoffset=struct.unpack('i',pakfile.read(4))[0]
-        filelength=struct.unpack('i',pakfile.read(4))[0]
+        fileoffset=struct.unpack('I',pakfile.read(4))[0]
+        filelength=struct.unpack('I',pakfile.read(4))[0]
         fileindex[filename]=(fileoffset,filelength)
         i+=1
     return pakfile,fileindex
@@ -3179,8 +3306,8 @@ def purge_voice(isexit=False):
                 try:
                     os.remove(os.path.join(GAME_PATH,'voice',voicefilename))
                 except:
-                    print 'Error while deleting',voicefilename
-
+                    #print 'Error while deleting',voicefilename
+                    pass
 
 def purge_image(isexit=False,timelimit=0):
     global GAME_PATH,gameconfig,bgpakfile,charapakfile,sepakfile
@@ -3194,7 +3321,8 @@ def purge_image(isexit=False,timelimit=0):
                 try:
                     os.remove(os.path.join(GAME_PATH,'bg',voicefilename))
                 except:
-                    print 'Error while deleting',voicefilename
+                    #print 'Error while deleting',voicefilename
+                    pass
                 if timelimit!=0 and end_time < time.clock():
                     return
         if isexit:
@@ -3206,7 +3334,8 @@ def purge_image(isexit=False,timelimit=0):
                 try:
                     os.remove(os.path.join(GAME_PATH,'chara',voicefilename))
                 except:
-                    print 'Error while deleting',voicefilename
+                    #print 'Error while deleting',voicefilename
+                    pass
                 if timelimit!=0 and end_time < time.clock():
                     return
         if isexit:
@@ -3218,7 +3347,8 @@ def purge_image(isexit=False,timelimit=0):
                 try:
                     os.remove(os.path.join(GAME_PATH,'se',voicefilename))
                 except:
-                    print 'Error while deleting',voicefilename
+                    #print 'Error while deleting',voicefilename
+                    pass
                 if timelimit!=0 and end_time < time.clock():
                     return
         sepakfile.close()
@@ -3464,7 +3594,7 @@ def change_script(filename):
     global f, save, GAME_PATH, cache, cache_pos, gameconfig
     if f:
         f.close()
-    f=file(os.path.join(GAME_PATH,'script',filename.lower()+u'.txt'),'r')
+    f=file(os.path.join(GAME_PATH,'script',filename+u'.txt'),'r')
     cache={'bg':{},'chara':{},'vo':{},'bgm':{},'sel':None}
     cache_pos=0
     save[u'linenum']=0
@@ -3788,7 +3918,7 @@ def ScriptParseMO1():
                 else:
                     varentry.append(True)
             i+=3
-            select_img=SelectImg(args[1],selentry,varentry,int(args[i]))
+            select_img=SelectImg(load_select_image(args[1],len(selentry)),selentry,varentry,int(args[i]))
             save[u'variables']['F91']=select_img.select()
             del selentry
             del select_img
@@ -4192,7 +4322,7 @@ def ScriptParseMO2():
                 else:
                     varentry.append(True)
             i+=3
-            select_img=SelectImg(args[1],selentry,varentry,int(args[i]))
+            select_img=SelectImg(load_select_image(args[1],len(selentry)),selentry,varentry,int(args[i]))
             save[u'variables']['F11']=select_img.select()
             del selentry
             del select_img
@@ -4592,7 +4722,31 @@ def ScriptParsePYMO():
                     else:
                         varentry.append(False)
                 i+=3
-                select_img=SelectImg(args[1],selentry,varentry,int(args[i]))
+                select_img=SelectImg(load_select_image(args[1],len(selentry)),selentry,varentry,int(args[i]))
+                save[u'variables']['FSEL']=select_img.select()
+                del selentry
+                del select_img
+                continue
+            #select_imgs 4,button0,40,40,var0,button1,40,50,var1,button2,40,60,var2,1
+            if command.startswith(u'#select_imgs '):
+                args=split_parameter(command,u'#select_imgs ')
+                filenameentry=[]
+                selentry=[]
+                varentry=[]
+                for i in range(1,4*int(args[0]),4):
+                    filenameentry.append(args[i])
+                    selentry.append(pos_bg2screen((int(args[i+1])*bgsize[0]/100,int(args[i+2])*bgsize[1]/100)))
+                    if args[i+3].isdigit():
+                        if int(args[i+3])==0:
+                            varentry.append(False)
+                        else:
+                            varentry.append(True)
+                    elif save[u'variables'].has_key(args[i+3]):
+                        varentry.append(bool(save[u'variables'][args[i+3]]))
+                    else:
+                        varentry.append(False)
+                i+=4
+                select_img=SelectImg(load_select_images(filenameentry),selentry,varentry,int(args[i]))
                 save[u'variables']['FSEL']=select_img.select()
                 del selentry
                 del select_img
@@ -4647,20 +4801,21 @@ def ScriptParsePYMO():
                 if android:
                     error_log(traceback.format_exc())
                 else:
+                    error_log(traceback.format_exc())
                     traceback.print_exc()
                 if query(stringres[u'ERROR'],
                       stringres[u'SCRIPT_ERROR_1']+os.path.basename(f.name)+stringres[u'SCRIPT_ERROR_2']+str(save[u'linenum'])+stringres[u'SCRIPT_ERROR_6'],
                       [stringres[u'YES'],stringres[u'NO']])==1:
-                    sys.exit()
+                    return
             else:
                 traceback.print_exc()
                 if not appuifw.query(stringres[u'SCRIPT_ERROR_1']+os.path.basename(f.name)+stringres[u'SCRIPT_ERROR_2']+str(save[u'linenum'])+stringres[u'SCRIPT_ERROR_6'],'query'):
-                    sys.exit()
+                    return
 
 #Following is main function
 
-def main(windowsize=None):
-    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,gameconfig,gameconfigbak,save,GAME_PATH,LOG_PATH,chara_on,f,sfx,bgmloop,bgmstart,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres
+def main(platform='android'):
+    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,globalconfig,gameconfig,gameconfigbak,save,GAME_PATH,LOG_PATH,chara_on,f,sfx,bgmloop,bgmstart,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres
     final_img=None
     staticimg={'keypad':None}
     background=False
@@ -4677,36 +4832,41 @@ def main(windowsize=None):
     GAME_PATH=None
     RES_PATH=u''
     #find LOG_PATH
-    if android:
-        if os.path.exists('globalconfig.txt'):
-            globalconfig=read_global_config('globalconfig.txt')
-            paths=globalconfig['last_path']
-        else:
-            paths='/mnt/sdcard'
-    else:
-        paths=os.getcwd()
+    paths=os.getcwd()
     LOG_PATH=os.path.join(paths,'pymo.log')
+    if android:
+        platform='android'
     try:
         pygame.init()
         pygame.display.init()
-        scalemode=2
-        if windowsize==None:
+        #setup window property
+        globalconfig=read_global_config('globalconfig.txt')
+        if platform=='android':
+            scalemode=2
             displayinfo=pygame.display.Info()
             screensize=(displayinfo.current_w,displayinfo.current_h)
-        else:
-            screensize=windowsize
-        canvas = pygame.display.set_mode(screensize)
-        #canvas = pygame.display.set_mode(screensize,pygame.FULLSCREEN|pygame.HWSURFACE)
-        pygame.display.set_caption('pymo '+str(engineversion)+' by chen_xin_ming')
+            canvas = pygame.display.set_mode(screensize)
+        elif platform=='windows' or platform=='linux' or platform=='macos':
+            scalemode=2
+            screensize=(593,360)
+            canvas = pygame.display.set_mode(screensize,pygame.HWSURFACE)
+            pygame.display.set_caption('pymo '+str(engineversion)+' by chen_xin_ming')
+        elif platform=='maemo' or platform=='meego':
+            scalemode=1
+            screensize=(800,480)
+            canvas = pygame.display.set_mode(screensize,pygame.FULLSCREEN|pygame.HWSURFACE)
         stringres=load_string_res('stringres.txt')
-        staticimg['keypad'] = load_image("keypad.png", width=None, height=screensize[1], is_alpha=False)
+        load_keypad()
         keypadsize = staticimg['keypad'].get_size()
-        screensize=(screensize[0]-keypadsize[0],screensize[1])
+        if globalconfig['keypad_bottom']==0:
+            screensize=(screensize[0]-keypadsize[0],screensize[1])
+        else:
+            screensize=(screensize[0],screensize[1]-keypadsize[1])
         final_img=pygame.Surface(screensize)
         scaleratio=(screensize[1],360)
         gameconfig[u'fontsize']=20*scaleratio[0]/scaleratio[1]
         # Map the back button to the escape key.
-        if android:
+        if platform=='android':
             android.init()
             android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
             android.map_key(android.KEYCODE_MENU, pygame.K_0)
@@ -4724,19 +4884,12 @@ def main(windowsize=None):
         running=False
         save={u'linenum':0,u'chara':{},u'variables':{},u'callstack':[],u'msgbox':u'message',u'namebox':u'name',u'bgpercentorig':(0,0)}
         set_font()
-        # ####################
-        # edit here
-        # ####################
-        
         keyboard=Keyboard()
-        if android:
-            GAME_PATH=paths
-            #see if game folder allows write
-            try:
-                tempfile=file(LOG_PATH,'w')
-                tempfile.close()
-            except IOError:
-                query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
+        # ####################
+        # if on android, use android launcher, else use pymo launcher
+        # ####################
+        if platform=='android':
+            GAME_PATH=globalconfig['last_path']
         else:
             gamelist=[]
             gametextlist=[]
@@ -4759,7 +4912,7 @@ def main(windowsize=None):
                     query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND'],[stringres[u'OK']])
                 error_log('Error: No game found! Exit...')
                 return
-
+    
             #display game launcher to select a game
             gamelauncher=SelectList(gametextlist,iconlist=gameiconlist)
             gameid=gamelauncher.select()
@@ -4769,8 +4922,7 @@ def main(windowsize=None):
             del gameiconlist
             del gametextlist
             del gamelauncher
-            GAME_PATH=gamelist[gameid]#.decode('gbk')
-
+            GAME_PATH=gamelist[gameid]
         #read the selected game config
         try:
             read_game_config(GAME_PATH)
@@ -4779,6 +4931,18 @@ def main(windowsize=None):
             error_log("Error: "+ gamelist[gameid]+'/gameconfig.txt '+'is corrupted')
             pygame.quit()
             return
+        #remove the log file in SD card's root dir
+        try:
+            os.remove(LOG_PATH)
+        except:
+            pass
+        LOG_PATH=os.path.join(GAME_PATH,'pymo.log')
+        #see if game folder allows write
+        try:
+            tempfile=file(LOG_PATH,'w')
+            tempfile.close()
+        except IOError:
+            query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
         chara_on=False
         if gameconfig.has_key(u'engineversion'):
             if float(gameconfig[u'engineversion'])>engineversion:
@@ -4795,20 +4959,30 @@ def main(windowsize=None):
                 if query(stringres[u'WARNING'],stringres[u'PLATFORM_ERROR_V5'],[stringres[u'YES'],stringres[u'NO']])==1:
                     pygame.quit()
                     return
-        if android:
-            for folder in ['bg','bgm','chara','se','system','voice']:
+        if platform=='android':
+            for folder in ['bg','bgm','chara','se','system','voice','save','video']:
                 create_nomedia(folder)
-        else:
+            load_keypad()
+            keypadsize = staticimg['keypad'].get_size()
+            if globalconfig['keypad_bottom']==0:
+                screensize=(displayinfo.current_w-keypadsize[0],displayinfo.current_h)
+            else:
+                screensize=(displayinfo.current_w,displayinfo.current_h-keypadsize[1])
+        elif platform=='windows' or platform=='linux' or platform=='macos':
             screensize = gameconfig[u'imagesize']
+        if platform=='android' or platform=='windows' or platform=='linux' or platform=='macos':
             final_img=pygame.Surface(screensize)
             staticimg['bg_img']=pygame.Surface(screensize)
             staticimg['chara_img']=pygame.Surface(screensize)
             staticimg['oldimg']=pygame.Surface(screensize)
             staticimg['tempimg']=pygame.Surface(screensize)
             staticimg['paragraph_img']=pygame.Surface(screensize,flags=pygame.SRCALPHA)
-            staticimg['keypad'] = load_image("keypad.png", width=None, height=screensize[1], is_alpha=False)
+            load_keypad()
             keypadsize = staticimg['keypad'].get_size()
-            canvas = pygame.display.set_mode((screensize[0]+keypadsize[0],screensize[1]))
+            if globalconfig['keypad_bottom']==0:
+                canvas = pygame.display.set_mode((screensize[0]+keypadsize[0],screensize[1]))
+            else:
+                canvas = pygame.display.set_mode((screensize[0],screensize[1]+keypadsize[1]))
             keyboard=Keyboard()
             anime=Animation()
         modify_game_config(True)
@@ -4835,20 +5009,27 @@ def main(windowsize=None):
             scaleratio=(screensize[0],gameconfig[u'imagesize'][0])
             bgsize=(screensize[0],gameconfig[u'imagesize'][1]*screensize[0]/gameconfig[u'imagesize'][0])
         #if this is the first time that game runs, convert all the filenames to lower case
-        #if not os.path.exists(os.path.join(GAME_PATH,'save','global.sav')):
-        #    rename_files(GAME_PATH)
+        #if platform=='linux' or platform=='macos' or platform=='maemo' or platform=='meego':
+        #    if not os.path.exists(os.path.join(GAME_PATH,'save','global.sav')):
+        #        rename_files(GAME_PATH)
+        
         bgpakfile,bgindex=load_pak_file(os.path.join('bg','bg.pak'))
-        BGLoad(0,u'logo1')
-        BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
+        if platform!='android':
+            BGLoad(0,u'logo1')
+            BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
+        else:
+            BGLoad(0,u'logo2')
+            BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
         Load_system_images()
 
         charapakfile,charaindex=load_pak_file(os.path.join('chara','chara.pak'))
         sepakfile,seindex=load_pak_file(os.path.join('se','se.pak'))
-        BGLoad(0,u'logo2')
-        BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
+        if platform!='android':
+            BGLoad(0,u'logo2')
+            BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
         vopakfile,voindex=load_pak_file(os.path.join('voice','voice.pak'))
         purge_voice(True)
-        f=file(os.path.join(GAME_PATH,'script',gameconfig[u'startscript'].lower()+u'.txt'),'r')
+        f=file(os.path.join(GAME_PATH,'script',gameconfig[u'startscript']+u'.txt'),'r')
         if gameconfig[u'scripttype']==u'mo1':
             ScriptParseMO1()
         if gameconfig[u'scripttype']==u'mo2':
@@ -4861,6 +5042,7 @@ def main(windowsize=None):
         SE_STP()
         f.close()
         try:
+            save_global()
             purge_voice(True)
             purge_image(True)
             if vopakfile!=None:
@@ -4877,10 +5059,10 @@ def main(windowsize=None):
         if android:
             error_log(traceback.format_exc())
         else:
+            error_log(traceback.format_exc())
             traceback.print_exc()
     pygame.quit()
     
-# This isn't run on Android.
 if __name__ == "__main__":
-    main((593,360))
-    #main((800,480))
+    # platform could be windows, linux, macos, android, maemo and meego
+    main(platform='windows')
