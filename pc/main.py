@@ -58,7 +58,18 @@ class Keyboard(object):
         events  = pygame.event.get()
         if android:
             if android.check_pause():
+                if mixer.music.get_busy():
+                    mixer.music.stop()
+                    music_paused=True
+                else:
+                    music_paused=False
+                VO_STP()
+                SE_STP()
                 android.wait_for_resume()
+                if music_paused:
+                    mixer.music.play()
+                update_screen()
+                update_screen()
             #loop music
             if bgmloop and (not mixer.music.get_busy()):
                 mixer.music.play()
@@ -110,6 +121,7 @@ class Keyboard(object):
             elif ev.type == pygame.MOUSEMOTION:
                 if ev.pos[0]>0 and ev.pos[1]>0:
                     self._last_pos=ev.pos
+                    
     def handle_down(self,code):
         global running, quitbind, stringres
         if not self.is_down(code):
@@ -415,7 +427,7 @@ def draw_image(img,img_origin=(0,0),on_canvas=True, on_final_img=True):
             pygame.display.flip()
 
 def display_cursor(cursororigin, wait_for_vo=False):
-    global keyboard, staticimg, final_img, background, vo, auto_play, gameconfig
+    global keyboard, staticimg, final_img, background, vo, auto_play, gameconfig, running
     if keyboard.is_down(key_codes.EScancode1):
         return
     cursororigin=(cursororigin[0],cursororigin[1]+gameconfig[u'fontsize']/4)
@@ -520,26 +532,26 @@ def load_keypad(autoon=False):
     global screensize,globalconfig,staticimg,gameconfig
     greycolor=(128,128,128)
     if android:
-        if globalconfig['keypad_extend']==1:
-            globalconfig['keypad_num']=9
-        else:
-            globalconfig['keypad_num']=7
         if gameconfig.has_key(u'imagesize'):
             displayinfo=pygame.display.Info()
-            if globalconfig['keypad_horizontal']==1 and (displayinfo.current_h-displayinfo.current_w*gameconfig[u'imagesize'][1]/gameconfig[u'imagesize'][0] > displayinfo.current_w/9):
+            if globalconfig['keypad_horizontal']==1 and (displayinfo.current_h-displayinfo.current_w*gameconfig[u'imagesize'][1]/gameconfig[u'imagesize'][0] >= displayinfo.current_w/18):
                 globalconfig['keypad_bottom']=1
                 globalconfig['keypad_num']=9
                 if globalconfig['original_ratio']==1:
                     keypad_thickness=displayinfo.current_h-displayinfo.current_w*gameconfig[u'imagesize'][1]/gameconfig[u'imagesize'][0]
                 else:
-                    keypad_thickness=displayinfo.current_w/globalconfig['keypad_num']
+                    keypad_thickness=displayinfo.current_w/18
             else:
-                globalconfig['keypad_bottom']=0
+                if globalconfig['keypad_extend']==1:
+                    globalconfig['keypad_num']=9
+                else:
+                    globalconfig['keypad_num']=7
                 if globalconfig['original_ratio']==1:
                     keypad_thickness=max( displayinfo.current_h/globalconfig['keypad_num'], displayinfo.current_w-displayinfo.current_h*gameconfig[u'imagesize'][0]/gameconfig[u'imagesize'][1] )
                 else:
                     keypad_thickness=displayinfo.current_h/globalconfig['keypad_num']
         else:
+            globalconfig['keypad_num']=7
             globalconfig['keypad_bottom']=0
             keypad_thickness=screensize[1]/globalconfig['keypad_num']
     else:
@@ -907,7 +919,6 @@ def VO_STP():
 def PlayMovie(videofilename):
     if android:
         videopath=os.path.join(GAME_PATH,'video',videofilename+'.mp4')
-        BGMStop()
         try:
             android.play_video(videopath)
         except:
@@ -1322,7 +1333,7 @@ class SelectList(object):
         e32.ao_yield()
 
     def select(self,highlightpos=None):
-        global keyboard, running
+        global keyboard
         pen_down=False
         if highlightpos!=None:
             if highlightpos>=3:
@@ -2282,7 +2293,7 @@ def message_after(char_list,name=None):
     e32.reset_inactivity()
 
 def message(charlist,name=None):#(char_list,name=None,topleft, bottomright,show_immediately=False):
-    global staticimg, gameconfig, running
+    global staticimg, gameconfig
     if charlist==u'':
         return
     consttextorigin=(gameconfig[u'msglr'][0],screensize[1]-get_image_height(staticimg['messagebox'])+gameconfig[u'msgtb'][0])
@@ -2300,6 +2311,7 @@ def message(charlist,name=None):#(char_list,name=None,topleft, bottomright,show_
     message_after(charlist,name)
 
 def draw_onebyone(charlist, topleft, bottomright, color, name=None, redrawmesagebox=True):
+    global running
     delay_time=[0.1,0.07,0.04,0.02,0,0]
     i=0
     line_num=0
@@ -3166,12 +3178,13 @@ def jump_to_line(linenum):
         save[u'linenum']+=1
 
 def Auto_Play(pos=(0,0)):
-    global auto_play,staticimg,screensize
-    auto_play=not auto_play
-    if auto_play:
-        load_keypad(autoon=True)
-    else:
-        load_keypad(autoon=False)
+    global auto_play,staticimg,screensize,running
+    if running:
+        auto_play=not auto_play
+        if auto_play:
+            load_keypad(autoon=True)
+        else:
+            load_keypad(autoon=False)
 
 def unpack_file(filename, filetype):
     global voindex,vopakfile,seindex,sepakfile,bgindex,bgpakfile,charaindex,charapakfile,GAME_PATH, gameconfig
@@ -3203,6 +3216,7 @@ def unpack_file(filename, filetype):
                 tempfile.write(charapakfile.read(charaindex[filename][1]))
                 tempfile.close()
             except:
+                print charaindex[filename]
                 print 'Error while unpacking chara resource. Memory card full?'
     if filetype==u'voiceformat':
         if vopakfile==None:
@@ -3530,14 +3544,14 @@ def PrefetchingPYMO():
         if command.startswith(u'#chara '):
             args=split_parameter(command,u'#chara ')
             for i in range (1,len(args)-1,4):
-                if args[i]!=u'NULL':
+                if args[i].upper()!=u'NULL':
                     cache_add('chara',args[i],cache_pos,bak_pos)
             break
         #chara_y
         if command.startswith(u'#chara_y '):
             args=split_parameter(command,u'#chara_y ')
             for i in range (2,len(args)-1,5):
-                if args[i]!=u'NULL':
+                if args[i].upper()!=u'NULL':
                     cache_add('chara',args[i],cache_pos,bak_pos)
             break
         #chara_scroll 5,0,SM02AMA,0,0,50,0,1,400
@@ -4408,7 +4422,7 @@ def ScriptParsePYMO():
             if command.startswith(u'#chara '):
                 args=split_parameter(command,u'#chara ')
                 for i in range (0,len(args)-1,4):
-                    if args[i+1]==u'NULL':
+                    if args[i+1].upper()==u'NULL':
                         CHASetInvisible(args[i])
                         CHAResetPos(args[i])
                     else:
@@ -4422,7 +4436,7 @@ def ScriptParsePYMO():
             if command.startswith(u'#chara_y '):
                 args=split_parameter(command,u'#chara_y ')
                 for i in range (1,len(args)-1,5):
-                    if args[i+1]==u'NULL':
+                    if args[i+1].upper()==u'NULL':
                         CHASetInvisible(args[i])
                         CHAResetPos(args[i])
                     else:
@@ -4806,11 +4820,11 @@ def ScriptParsePYMO():
                 if query(stringres[u'ERROR'],
                       stringres[u'SCRIPT_ERROR_1']+os.path.basename(f.name)+stringres[u'SCRIPT_ERROR_2']+str(save[u'linenum'])+stringres[u'SCRIPT_ERROR_6'],
                       [stringres[u'YES'],stringres[u'NO']])==1:
-                    return
+                    sys.exit(1)
             else:
                 traceback.print_exc()
                 if not appuifw.query(stringres[u'SCRIPT_ERROR_1']+os.path.basename(f.name)+stringres[u'SCRIPT_ERROR_2']+str(save[u'linenum'])+stringres[u'SCRIPT_ERROR_6'],'query'):
-                    return
+                    sys.exit(1)
 
 #Following is main function
 
