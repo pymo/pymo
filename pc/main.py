@@ -833,17 +833,23 @@ def delay_until(end_time):
 
 def stop_channel(channel_id):
     try:
-        if android and channel_id!=None:
-            mixer.Channel(channel_id).stop()
+        if android:
+            if channel_id!=None:
+                mixer.Channel(channel_id).stop()
+        else:
+            channel_id.stop()
     except:
         print 'Error while stopping channel',channel_id
 
 def get_busy_channel(channel_id):
     try:
-        if android and channel_id!=None:
-            return mixer.Channel(channel_id).get_busy()
+        if android:
+            if channel_id!=None:
+                return mixer.Channel(channel_id).get_busy()
+            else:
+                return False
         else:
-            return False
+            return channel_id.get_busy()
     except:
         return False
 
@@ -3069,7 +3075,7 @@ def check_expression(exp):
     operand1=del_blank(exp[:i])
     operand2=del_blank(exp[j:])
     if not save[u'variables'].has_key(operand1):
-        print "No left operand",operand1,'to compare, create one'
+        #print "No left operand",operand1,'to compare, create one'
         save[u'variables'][operand1]=0
         tempvar=True
     if operand2.isdigit():
@@ -3078,7 +3084,7 @@ def check_expression(exp):
         if save[u'variables'].has_key(operand2):
             operandnum=save[u'variables'][operand2]
         else:
-            print "No right operand",operand2,'to compare, return False'
+            #print "No right operand",operand2,'to compare, return False'
             return False
     if operator==u'=' or operator==u'==':
         ret=(save[u'variables'][operand1]==operandnum)
@@ -3216,7 +3222,6 @@ def unpack_file(filename, filetype):
                 tempfile.write(charapakfile.read(charaindex[filename][1]))
                 tempfile.close()
             except:
-                print charaindex[filename]
                 print 'Error while unpacking chara resource. Memory card full?'
     if filetype==u'voiceformat':
         if vopakfile==None:
@@ -3846,7 +3851,7 @@ def ScriptParseMO1():
         if command.startswith(u'#add '):
             args=split_parameter(command,u'#add ')
             if not save[u'variables'].has_key(args[0]):
-                print "No variable",args[0]
+                #print "No variable",args[0]
                 continue
             save[u'variables'][args[0]]+=int(args[1].replace(' ',''))
             #print variables
@@ -4231,7 +4236,7 @@ def ScriptParseMO2():
         if command.startswith(u'#add '):
             args=split_parameter(command,u'#add ')
             if not save[u'variables'].has_key(args[0]):
-                print "No variable",args[0],'to add,create it.'
+                #print "No variable",args[0],'to add,create it.'
                 save[u'variables'][args[0]]=0
             value=del_blank(args[1])
             if value.isdigit():
@@ -4239,13 +4244,13 @@ def ScriptParseMO2():
             elif save[u'variables'].has_key(value):
                 save[u'variables'][args[0]]+=save[u'variables'][value]
             else:
-                print 'Error while add',args[1],'to',args[0]
+                print 'Error while add'#,args[1],'to',args[0]
             continue
         #sub F16,1
         if command.startswith(u'#sub '):
             args=split_parameter(command,u'#sub ')
             if not save[u'variables'].has_key(args[0]):
-                print "No variable",args[0],'to sub,create it.'
+                #print "No variable",args[0],'to sub,create it.'
                 save[u'variables'][args[0]]=0
             value=del_blank(args[1])
             if value.isdigit():
@@ -4253,7 +4258,7 @@ def ScriptParseMO2():
             elif save[u'variables'].has_key(value):
                 save[u'variables'][args[0]]-=save[u'variables'][value]
             else:
-                print 'Error while sub',args[1],'to',args[0]
+                print 'Error while sub'#,args[1],'to',args[0]
             continue
         #if F11=0, goto HO01_0
         if command.startswith(u'#if '):
@@ -4605,7 +4610,7 @@ def ScriptParsePYMO():
             if command.startswith(u'#add '):
                 args=split_parameter(command,u'#add ')
                 if not save[u'variables'].has_key(args[0]):
-                    print "No variable",args[0],'to add,create it.'
+                    #print "No variable",args[0],'to add,create it.'
                     save[u'variables'][args[0]]=0
                 value=args[1]
                 if value.isdigit():
@@ -4613,13 +4618,13 @@ def ScriptParsePYMO():
                 elif save[u'variables'].has_key(value):
                     save[u'variables'][args[0]]+=save[u'variables'][value]
                 else:
-                    print 'Error while add',args[1],'to',args[0]
+                    print 'Error while add'#,args[1],'to',args[0]
                 continue
             #sub F16,1
             if command.startswith(u'#sub '):
                 args=split_parameter(command,u'#sub ')
                 if not save[u'variables'].has_key(args[0]):
-                    print "No variable",args[0],'to sub,create it.'
+                    #print "No variable",args[0],'to sub,create it.'
                     save[u'variables'][args[0]]=0
                 value=args[1]
                 if value.isdigit():
@@ -4627,7 +4632,7 @@ def ScriptParsePYMO():
                 elif save[u'variables'].has_key(value):
                     save[u'variables'][args[0]]-=save[u'variables'][value]
                 else:
-                    print 'Error while sub',args[1],'to',args[0]
+                    print 'Error while sub'#,args[1],'to',args[0]
                 continue
             #rand F11,0,3
             if command.startswith(u'#rand '):
