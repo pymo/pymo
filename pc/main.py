@@ -2067,7 +2067,14 @@ def message_before(name=None):
         save[u'name']=name
         measure_result=measure_text(name)
         name_origin=(gameconfig[u'nameboxorig'][0],screensize[1]-get_image_height(staticimg['messagebox'])-gameconfig[u'nameboxorig'][1]-get_image_height(staticimg['message_name']))
-        nametext_origin=(name_origin[0]+(get_image_width(staticimg['message_name'])-measure_result[1])/2-1,name_origin[1]+(get_image_height(staticimg['message_name'])-(measure_result[0][3]-measure_result[0][1]))/2)
+        if gameconfig[u'namealign']=='left':
+            nametext_origin=(name_origin[0]+gameconfig[u'fontsize']/2,
+                             name_origin[1]+(get_image_height(staticimg['message_name'])-(measure_result[0][3]-measure_result[0][1]))/2)
+        elif gameconfig[u'namealign']=='right':
+            nametext_origin=(name_origin[0]+get_image_width(staticimg['message_name'])-measure_result[1]-gameconfig[u'fontsize']/2,
+                             name_origin[1]+(get_image_height(staticimg['message_name'])-(measure_result[0][3]-measure_result[0][1]))/2)
+        else:
+            nametext_origin=(name_origin[0]+(get_image_width(staticimg['message_name'])-measure_result[1])/2-1,name_origin[1]+(get_image_height(staticimg['message_name'])-(measure_result[0][3]-measure_result[0][1]))/2)
         if gameconfig[u'platform']==u'pygame':
             draw_image(staticimg['message_name'],img_origin=name_origin,on_canvas=False)
         else:
@@ -4846,7 +4853,8 @@ def main(platform='android'):
     quitbind=True
     autosave=0
     engineversion=1.0
-    gameconfig={u'font':1,u'fontaa':1,u'grayselected':1,u'hint':1,u'textspeed':3,u'textcolor':(255,255,255),u'cgprefix':u'EV_',u'vovolume':0,u'bgmvolume':0,u'msgtb':(6,0),u'msglr':(10,7),u'anime':1,u'platform':'pygame'}
+    gameconfig={u'font':1,u'fontaa':1,u'grayselected':1,u'hint':1,u'textspeed':3,u'textcolor':(255,255,255),u'cgprefix':u'EV_',
+                u'vovolume':0,u'bgmvolume':0,u'msgtb':(6,0),u'msglr':(10,7),u'anime':1,u'platform':'pygame',u'namealign':'middle'}
     gameconfigbak={}
     GAME_PATH=None
     RES_PATH=u''
@@ -4925,10 +4933,7 @@ def main(platform='android'):
                             query(stringres[u'WARNING'],os.path.join(root, filename)+stringres[u'IS_BROKEN'],[stringres[u'OK']])
                             error_log("Warning: "+os.path.join(root, filename)+' is corrupted!')
             if len(gamelist)<1:
-                if android:
-                    query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND_ANDROID'],[stringres[u'OK']])
-                else:
-                    query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND'],[stringres[u'OK']])
+                query(stringres[u'ERROR'],stringres[u'GAME_NOTFOUND'],[stringres[u'OK']])
                 error_log('Error: No game found! Exit...')
                 return
     
