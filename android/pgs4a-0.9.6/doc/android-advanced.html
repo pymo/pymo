@@ -1,0 +1,155 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>More about Packaging &mdash; Pygame Subset for Android</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pygame Subset for Android" href="index.html" />
+    <link rel="next" title="Developer’s Guide" href="developing.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="developing.html" title="Developer’s Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="more-about-packaging">
+<h1>More about Packaging<a class="headerlink" href="#more-about-packaging" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="icon-and-presplash">
+<h2>Icon and Presplash<a class="headerlink" href="#icon-and-presplash" title="Permalink to this headline">¶</a></h2>
+<p>PGS4A uses an icon to represent your project in the launcher. It
+also displays a presplash image as your project is loading, before
+Pygame initializes the screen. Both images can be customized by
+placing files in the game directory. The relevant files are:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">android-icon.png</span></tt></dt>
+<dd>The icon. This may include transparency.</dd>
+<dt><tt class="docutils literal"><span class="pre">android-presplash.jpg</span></tt></dt>
+<dd>The presplash image. The border around this image is filled with
+the color of the top-left pixel.</dd>
+</dl>
+</div>
+<div class="section" id="split-layout-packages">
+<h2>Split Layout Packages<a class="headerlink" href="#split-layout-packages" title="Permalink to this headline">¶</a></h2>
+<p>PGS4A supports packages that use a split layout, in which files are
+divided between the internal storage, external storage, and the assets
+directory.</p>
+<p>When the split layout is chosen, a project should consist one, two, or
+three of the following directories:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">internal</span></tt></dt>
+<dd>Files to be unpacked to the internal storage.</dd>
+<dt><tt class="docutils literal"><span class="pre">external</span></tt></dt>
+<dd>Files to be unpacked to the external storage.</dd>
+<dt><tt class="docutils literal"><span class="pre">assets</span></tt></dt>
+<dd>Files that are stored as assets that can be accessed using
+<a class="reference internal" href="api.html#android.assets.open" title="android.assets.open"><tt class="xref py py-func docutils literal"><span class="pre">android.assets.open()</span></tt></a>.</dd>
+</dl>
+<p>One of <tt class="docutils literal"><span class="pre">internal</span></tt> or <tt class="docutils literal"><span class="pre">external</span></tt> must exist to contain the main.py
+file. Without additonal code, PGS4A can&#8217;t import modules from the
+<tt class="docutils literal"><span class="pre">assets</span></tt> directory.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">More about Packaging</a><ul>
+<li><a class="reference internal" href="#icon-and-presplash">Icon and Presplash</a></li>
+<li><a class="reference internal" href="#split-layout-packages">Split Layout Packages</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developing.html"
+                        title="next chapter">Developer&#8217;s Guide</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="developing.html" title="Developer’s Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             >previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010-2012, Tom Rothamel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,397 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API &mdash; Pygame Subset for Android</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pygame Subset for Android" href="index.html" />
+    <link rel="next" title="More about Packaging" href="android-advanced.html" />
+    <link rel="prev" title="Writing a Game" href="writing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="android-advanced.html" title="More about Packaging"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="writing.html" title="Writing a Game"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-android">
+<span id="android"></span><h2>android<a class="headerlink" href="#module-android" title="Permalink to this headline">¶</a></h2>
+<p>The android module contains android-specific functionality. Right now, this
+includes lifecycle management, key mapping, and vibrator functions.</p>
+<dl class="function">
+<dt id="android.check_pause">
+<tt class="descclassname">android.</tt><tt class="descname">check_pause</tt><big>(</big><big>)</big><a class="headerlink" href="#android.check_pause" title="Permalink to this definition">¶</a></dt>
+<dd><p>This should be called on a regular basis to check to see if Android
+expects the game to pause. If it return true, the game should
+call <a class="reference internal" href="#android.wait_for_resume" title="android.wait_for_resume"><tt class="xref py py-func docutils literal"><span class="pre">android.wait_for_resume()</span></tt></a>, after persisting its state
+as necessary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.wait_for_resume">
+<tt class="descclassname">android.</tt><tt class="descname">wait_for_resume</tt><big>(</big><big>)</big><a class="headerlink" href="#android.wait_for_resume" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should be called after <a class="reference internal" href="#android.check_pause" title="android.check_pause"><tt class="xref py py-func docutils literal"><span class="pre">android.check_pause()</span></tt></a>
+returns true. It does not return until Android has resumed from
+the pause. While in this function, Android may kill a game
+without further notice.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.map_key">
+<tt class="descclassname">android.</tt><tt class="descname">map_key</tt><big>(</big><em>keycode</em>, <em>keysym</em><big>)</big><a class="headerlink" href="#android.map_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>This maps between an android keycode and a python keysym. The android
+keycodes are available as constants in the android module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.vibrate">
+<tt class="descclassname">android.</tt><tt class="descname">vibrate</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#android.vibrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Causes the phone to vibrate for <cite>s</cite> seconds. This requires that your
+application have the VIBRATE permission.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.accelerometer_enable">
+<tt class="descclassname">android.</tt><tt class="descname">accelerometer_enable</tt><big>(</big><em>enable</em><big>)</big><a class="headerlink" href="#android.accelerometer_enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enables (if <cite>enable</cite> is true) or disables the device&#8217;s accelerometer.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.accelerometer_reading">
+<tt class="descclassname">android.</tt><tt class="descname">accelerometer_reading</tt><big>(</big><big>)</big><a class="headerlink" href="#android.accelerometer_reading" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an (x, y, z) tuple of floats that gives the accelerometer
+reading, in meters per second squared. See <a class="reference external" href="http://developer.android.com/reference/android/hardware/SensorEvent.html">this page</a>
+for a description of the coordinate system. The accelerometer must
+be enabled before this function is called. If the tuple contains
+three zero values, the accelerometer is not enabled, not available,
+defective, has not returned a reading, or the device is in
+free-fall.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.get_dpi">
+<tt class="descclassname">android.</tt><tt class="descname">get_dpi</tt><big>(</big><big>)</big><a class="headerlink" href="#android.get_dpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the screen density in dots per inch.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.show_keyboard">
+<tt class="descclassname">android.</tt><tt class="descname">show_keyboard</tt><big>(</big><big>)</big><a class="headerlink" href="#android.show_keyboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the soft keyboard.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.hide_keyboard">
+<tt class="descclassname">android.</tt><tt class="descname">hide_keyboard</tt><big>(</big><big>)</big><a class="headerlink" href="#android.hide_keyboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hides the soft keyboard.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-android.assets">
+<span id="android-assets"></span><h2>android.assets<a class="headerlink" href="#module-android.assets" title="Permalink to this headline">¶</a></h2>
+<p>The android.assets object lets you access assets stored inside the apk
+file. These assets do not need to be unpacked to internal or external
+storage, reducing initial startup time.</p>
+<dl class="function">
+<dt id="android.assets.list">
+<tt class="descclassname">android.assets.</tt><tt class="descname">list</tt><big>(</big><big>)</big><a class="headerlink" href="#android.assets.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list containing all of the assets in the package.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="android.assets.open">
+<tt class="descclassname">android.assets.</tt><tt class="descname">open</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#android.assets.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a read-only file-like object that can access an asset.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-android.mixer">
+<span id="android-mixer"></span><h2>android.mixer<a class="headerlink" href="#module-android.mixer" title="Permalink to this headline">¶</a></h2>
+<p>The android.mixer module contains a subset of the functionality in found
+in the <a class="reference external" href="http://www.pygame.org/docs/ref/mixer.html">pygame.mixer</a> module. It&#8217;s
+intended to be imported as an alternative to pygame.mixer, using code like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pygame.mixer</span> <span class="kn">as</span> <span class="nn">mixer</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">android.mixer</span> <span class="kn">as</span> <span class="nn">mixer</span>
+</pre></div>
+</div>
+<p>The android.mixer module is a wrapper around the Android MediaPlayer
+class. This allows it to take advantage of any hardware acceleration
+present, and also eliminates the need to ship codecs as part of an
+application.</p>
+<p>It has several differences from the pygame mixer:</p>
+<ul class="simple">
+<li>The init and pre_init methods work, but are ignored - Android chooses
+appropriate settign automatically.</li>
+<li>Only filenames and true file objects can be used - file-like objects
+will probably not work.</li>
+<li>Fadeout does not work - it causes a stop to occur.</li>
+<li>Looping is all or nothing, there&#8217;s no way to choose the number of
+loops that occur. For looping to work, the
+<tt class="xref py py-func docutils literal"><span class="pre">android.mixer.periodic()</span></tt> function should be called on a
+regular basis.</li>
+<li>Volume control is ignored.</li>
+<li>End events are not implemented.</li>
+<li>The mixer.music object is a class (with static methods on it),
+rather than a module. Calling methods like <tt class="xref py py-func docutils literal"><span class="pre">mixer.music.play()</span></tt>
+should work.</li>
+</ul>
+<p>The android.mixer module hasn&#8217;t been tested much, and so bugs may be
+present.</p>
+</div>
+<div class="section" id="pygame">
+<h2>pygame<a class="headerlink" href="#pygame" title="Permalink to this headline">¶</a></h2>
+<p>The following pygame modules are present. Not all functionality is
+supported on Android.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pygame</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">base</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">bufferproxy</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">colordict</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">color</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">compat</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">constants</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">cursors</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">display</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">draw</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">event</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">fastevent</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">font</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">gfxdraw</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">imageext</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">image</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">joystick</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">key</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">locals</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">mask</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">overlay</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">rect</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">rwobject</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">sprite</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">surface</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">surflock</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">sysfont</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">time</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">transform</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">version</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="python">
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h2>
+<p>The following Python modules are present. Not all functionality is
+supported on Android.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">_abcoll</span>
+<span class="n">abc</span>
+<span class="n">aliases</span>
+<span class="n">array</span>
+<span class="n">ast</span>
+<span class="n">atexit</span>
+<span class="n">base64</span>
+<span class="n">bisect</span>
+<span class="n">binascii</span>
+<span class="n">calendar</span>
+<span class="n">cmath</span>
+<span class="n">codecs</span>
+<span class="n">collections</span>
+<span class="n">compileall</span>
+<span class="n">contextlib</span>
+<span class="n">copy</span>
+<span class="n">copy_reg</span>
+<span class="n">cStringIO</span>
+<span class="n">cPickle</span>
+<span class="n">datetime</span>
+<span class="n">difflib</span>
+<span class="n">dis</span>
+<span class="n">dummy_threading</span>
+<span class="n">dummy_thread</span>
+<span class="n">encodings</span>
+<span class="n">encodings</span><span class="o">.</span><span class="n">raw_unicode_escape</span>
+<span class="n">encodings</span><span class="o">.</span><span class="n">utf_8</span>
+<span class="n">encodings</span><span class="o">.</span><span class="n">zlib_codec</span>
+<span class="n">errno</span>
+<span class="n">fcntl</span>
+<span class="n">fnmatch</span>
+<span class="n">functools</span>
+<span class="n">__future__</span>
+<span class="n">genericpath</span>
+<span class="n">getopt</span>
+<span class="n">glob</span>
+<span class="n">gzip</span>
+<span class="n">hashlib</span>
+<span class="n">heapq</span>
+<span class="n">httplib</span>
+<span class="n">inspect</span>
+<span class="n">itertools</span>
+<span class="n">keyword</span>
+<span class="n">linecache</span>
+<span class="n">math</span>
+<span class="n">md5</span>
+<span class="n">mimetools</span>
+<span class="n">opcode</span>
+<span class="n">optparse</span>
+<span class="n">os</span>
+<span class="n">operator</span>
+<span class="n">parser</span>
+<span class="n">pickle</span>
+<span class="n">platform</span>
+<span class="n">posix</span>
+<span class="n">posixpath</span>
+<span class="n">pprint</span>
+<span class="n">py_compile</span>
+<span class="n">pwd</span>
+<span class="n">Queue</span>
+<span class="n">random</span>
+<span class="nb">repr</span>
+<span class="n">re</span>
+<span class="n">rfc822</span>
+<span class="n">select</span>
+<span class="n">sets</span>
+<span class="n">shlex</span>
+<span class="n">shutil</span>
+<span class="n">site</span>
+<span class="n">socket</span>
+<span class="n">sre_compile</span>
+<span class="n">sre_constants</span>
+<span class="n">sre_parse</span>
+<span class="n">ssl</span>
+<span class="n">stat</span>
+<span class="n">StringIO</span>
+<span class="n">string</span>
+<span class="n">struct</span>
+<span class="n">subprocess</span>
+<span class="n">symbol</span>
+<span class="n">symtable</span>
+<span class="n">strop</span>
+<span class="n">tarfile</span>
+<span class="n">tempfile</span>
+<span class="n">textwrap</span>
+<span class="n">_threading_local</span>
+<span class="n">threading</span>
+<span class="n">time</span>
+<span class="n">tokenize</span>
+<span class="n">token</span>
+<span class="n">traceback</span>
+<span class="n">types</span>
+<span class="n">urllib</span>
+<span class="n">urllib2</span>
+<span class="n">urlparse</span>
+<span class="n">UserDict</span>
+<span class="n">warnings</span>
+<span class="n">weakref</span>
+<span class="n">webbrowser</span>
+<span class="n">zipfile</span>
+<span class="n">zipimport</span>
+<span class="n">zlib</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API</a><ul>
+<li><a class="reference internal" href="#module-android">android</a></li>
+<li><a class="reference internal" href="#module-android.assets">android.assets</a></li>
+<li><a class="reference internal" href="#module-android.mixer">android.mixer</a></li>
+<li><a class="reference internal" href="#pygame">pygame</a></li>
+<li><a class="reference internal" href="#python">Python</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="writing.html"
+                        title="previous chapter">Writing a Game</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="android-advanced.html"
+                        title="next chapter">More about Packaging</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="android-advanced.html" title="More about Packaging"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="writing.html" title="Writing a Game"
+             >previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010-2012, Tom Rothamel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

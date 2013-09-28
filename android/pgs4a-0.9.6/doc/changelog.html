@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Changelog &mdash; Pygame Subset for Android</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pygame Subset for Android" href="index.html" />
+    <link rel="prev" title="Developer’s Guide" href="developing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="developing.html" title="Developer’s Guide"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="changelog">
+<span id="id1"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pygame-subset-for-android-0-9-6">
+<h2>Pygame Subset for Android 0.9.6<a class="headerlink" href="#pygame-subset-for-android-0-9-6" title="Permalink to this headline">¶</a></h2>
+<p>This release patches Python to work with .apk files distributed
+through the Amazon App Store, which are subtly different from
+standard apk files.</p>
+<p>This release fixes support for pre-2.3 Android devices.</p>
+</div>
+<div class="section" id="pygame-subset-for-android-0-9-5">
+<h2>Pygame Subset for Android 0.9.5<a class="headerlink" href="#pygame-subset-for-android-0-9-5" title="Permalink to this headline">¶</a></h2>
+<p>PGS4A now supports Expansion APKs when used in conjunction with the
+Google Play store. This increases the maximum package size from
+50 MB to 2 GB. (Sideloaders or users of other app stores should
+continue to produce a monolithic package.)</p>
+<p>PGS4A is now based on a slightly modified python-for-android, which in
+turn was originally based on PGS4A.</p>
+<p>PGS4A now uses and requires Android 2.2 and OpenGL ES 2.</p>
+<p><a class="reference external" href="https://github.com/kivy/pyjnius">PyJNIus</a> is included, allowing
+access to more Android functionality. (PyJNIus integration with
+PGS4A has not been tested.)</p>
+<p>The webbrowser module can now open URLs using the Android intents system.</p>
+<p>Increased the range of keycodes we support to include all keycodes in
+Android 13.</p>
+<p>The installsdk command now fixes permissions of the android script before
+running it. Hopefully, this will make PGS4A work better on OSX X. OS X is
+still not a supported development platform.</p>
+<p>The configure command now lets you choose to include python files in your
+apk package. Doing so may be necessary when upgrading a package originally
+made with PGS4A 0.9.3 or earlier.</p>
+<p>The android.mixer module is now documented properly, and android.mixer.periodic
+now works.</p>
+</div>
+<div class="section" id="pygame-subset-for-android-0-9-4">
+<h2>Pygame Subset for Android 0.9.4<a class="headerlink" href="#pygame-subset-for-android-0-9-4" title="Permalink to this headline">¶</a></h2>
+<p>This release changes the development process to a packaging centric
+one. Instead of copying files to the device&#8217;s storage, as in previous
+versions of PGS4A, this release focuses on making it far easier to
+create a release-worthy package.</p>
+<p>To enable this, the old build.py tool has been replaced with a new
+android.py tool. The new tool has the following functions:</p>
+<ul class="simple">
+<li>Installing and configuring an Android development environment with the
+correct versions of various software packages and signing keys.</li>
+<li>Allowing the user to interactively configure various build parameters.</li>
+<li>Mananging the process of building and installing an android package.</li>
+<li>Displaying log output.</li>
+</ul>
+<p>These changes were motivated by difficulties accessing the sdcard in
+some devices, and a general feeling that it was too hard to go from
+simple code to a market-ready package.</p>
+<p>New to this release is support for accessing assets in a package, using the
+<a class="reference internal" href="api.html#android.assets.list" title="android.assets.list"><tt class="xref py py-func docutils literal"><span class="pre">android.assets.list()</span></tt></a> and <a class="reference internal" href="api.html#android.assets.open" title="android.assets.open"><tt class="xref py py-func docutils literal"><span class="pre">android.assets.open()</span></tt></a> functions. The
+new split package layout makes it possible to includes assets as part
+of the packaging process.</p>
+</div>
+<div class="section" id="pygame-subset-for-android-0-9-3">
+<h2>Pygame Subset for Android 0.9.3<a class="headerlink" href="#pygame-subset-for-android-0-9-3" title="Permalink to this headline">¶</a></h2>
+<p>Important: An application must call <tt class="xref py py-func docutils literal"><span class="pre">android.init()</span></tt> before it can receive
+input events. This prevents a crash on input.</p>
+<p>PGS4A now uses Python 2.7.1.</p>
+<p>The <a class="reference internal" href="api.html#android.get_dpi" title="android.get_dpi"><tt class="xref py py-func docutils literal"><span class="pre">android.get_dpi()</span></tt></a> function retrieves the display DPI.</p>
+<p>The <a class="reference internal" href="api.html#android.show_keyboard" title="android.show_keyboard"><tt class="xref py py-func docutils literal"><span class="pre">android.show_keyboard()</span></tt></a> and <a class="reference internal" href="api.html#android.hide_keyboard" title="android.hide_keyboard"><tt class="xref py py-func docutils literal"><span class="pre">android.hide_keyboard()</span></tt></a> functions
+show and hide the on-screen keyboard. For now, the application is responsible
+for mapping android keys to pygame keys, and then to unicode.</p>
+<p>The following modules have been added by default: urllib2, io, uuid,
+json. The following encodings have been added: idna, base64, hex.</p>
+<p>The sqlite and PIL libraries are available, and can be enabled with the
+&#8211;with-sqlite3 and &#8211;with-PIL options.</p>
+</div>
+<div class="section" id="pygame-subset-for-android-0-9-2">
+<h2>Pygame Subset for Android 0.9.2<a class="headerlink" href="#pygame-subset-for-android-0-9-2" title="Permalink to this headline">¶</a></h2>
+<p>The packaging tool now include PGS4A as part of the packages it
+builds. While this makes the packages somewhat larger, doing this
+prevents the end user from having to download a second package to run a
+game, and allows multiple PGS4A games to run simultaneously. It also
+ensures that changes to PGS4A will not break games on user devices.</p>
+<p>The packaging tool has been rewritten, and now takes more options. It
+allows permissions (allowing vibration and internet access) to be
+supplied on a per-application basis. It also allows the presplash
+screen to be specified on a per-application basis.</p>
+<p>Windows support has been added to the packaging tool.</p>
+<p>The new <a class="reference internal" href="api.html#android.vibrate" title="android.vibrate"><tt class="xref py py-func docutils literal"><span class="pre">android.vibrate()</span></tt></a> function allows an application to
+request that the device vibrate for some period of time.</p>
+<p>The new <a class="reference internal" href="api.html#android.accelerometer_enable" title="android.accelerometer_enable"><tt class="xref py py-func docutils literal"><span class="pre">android.accelerometer_enable()</span></tt></a> and <cite>android.accelerometer_reading</cite>
+functions allow reading the device&#8217;s accelerometer.</p>
+</div>
+<div class="section" id="pygame-subset-for-android-0-9-1">
+<h2>Pygame Subset for Android 0.9.1<a class="headerlink" href="#pygame-subset-for-android-0-9-1" title="Permalink to this headline">¶</a></h2>
+<p>Initial market release.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-6">Pygame Subset for Android 0.9.6</a></li>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-5">Pygame Subset for Android 0.9.5</a></li>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-4">Pygame Subset for Android 0.9.4</a></li>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-3">Pygame Subset for Android 0.9.3</a></li>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-2">Pygame Subset for Android 0.9.2</a></li>
+<li><a class="reference internal" href="#pygame-subset-for-android-0-9-1">Pygame Subset for Android 0.9.1</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developing.html"
+                        title="previous chapter">Developer&#8217;s Guide</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="developing.html" title="Developer’s Guide"
+             >previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010-2012, Tom Rothamel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

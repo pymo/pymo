@@ -1,0 +1,277 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Writing a Game &mdash; Pygame Subset for Android</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pygame Subset for Android" href="index.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="Building Android Applications" href="android-packaging.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="android-packaging.html" title="Building Android Applications"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="writing-a-game">
+<span id="writing"></span><h1>Writing a Game<a class="headerlink" href="#writing-a-game" title="Permalink to this headline">¶</a></h1>
+<p>A Pygame Subset for Android game consists of a game written using the subset of
+pygame we support, with calls to android-specific APIs as necessary. Execution
+starts by importing the main module, and calling its main function. This means
+that the start point of your game is in the main.py file.</p>
+<p>Here&#8217;s a main.py file for a trivial game:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pygame</span>
+
+<span class="c"># Import the android module. If we can&#39;t import it, set it to None - this</span>
+<span class="c"># lets us test it, and check to see if we want android-specific behavior.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">android</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">android</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c"># Event constant.</span>
+<span class="n">TIMEREVENT</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">USEREVENT</span>
+
+<span class="c"># The FPS the game runs at.</span>
+<span class="n">FPS</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="c"># Color constants.</span>
+<span class="n">RED</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">GREEN</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="c"># Set the screen size.</span>
+    <span class="n">screen</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="mi">480</span><span class="p">,</span> <span class="mi">800</span><span class="p">))</span>
+
+    <span class="c"># Map the back button to the escape key.</span>
+    <span class="k">if</span> <span class="n">android</span><span class="p">:</span>
+        <span class="n">android</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="n">android</span><span class="o">.</span><span class="n">map_key</span><span class="p">(</span><span class="n">android</span><span class="o">.</span><span class="n">KEYCODE_BACK</span><span class="p">,</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_ESCAPE</span><span class="p">)</span>
+
+    <span class="c"># Use a timer to control FPS.</span>
+    <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">set_timer</span><span class="p">(</span><span class="n">TIMEREVENT</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">FPS</span><span class="p">)</span>
+
+    <span class="c"># The color of the screen.</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">RED</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+
+        <span class="n">ev</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="c"># Android-specific:</span>
+        <span class="k">if</span> <span class="n">android</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">android</span><span class="o">.</span><span class="n">check_pause</span><span class="p">():</span>
+                <span class="n">android</span><span class="o">.</span><span class="n">wait_for_resume</span><span class="p">()</span>
+
+        <span class="c"># Draw the screen based on the timer.</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TIMEREVENT</span><span class="p">:</span>
+            <span class="n">screen</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
+
+        <span class="c"># When the touchscreen is pressed, change the color to green.</span>
+        <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONDOWN</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">GREEN</span>
+
+        <span class="c"># When it&#39;s released, change the color to RED.</span>
+        <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">RED</span>
+
+        <span class="c"># When the user hits back, ESCAPE is sent. Handle it and end</span>
+        <span class="c"># the game.</span>
+        <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">KEYDOWN</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_ESCAPE</span><span class="p">:</span>
+            <span class="k">break</span>
+
+<span class="c"># This isn&#39;t run on Android.</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This simple program barely qualifies as a game - all it does is change the
+color of the screen when the user is touching it. It&#8217;s probably only
+entertaining to the one-year-old crowd, for whom making anything at all
+occur is a source of fun.</p>
+<p>This code can be run both on a PC with pygame installed, and on Pygame
+Subset for Android.</p>
+<div class="section" id="main">
+<h2>Main<a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h2>
+<p>Note that all code is in the main function, with little code at the
+module level. This ensures that the code will run when it is imported
+without the import lock being held.</p>
+<p>While we include the standard:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>clause, it doesn&#8217;t do anything on Android. It&#8217;s just there to ensure this
+code works on the PC platform.</p>
+</div>
+<div class="section" id="importing-android">
+<h2>Importing Android<a class="headerlink" href="#importing-android" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">android</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">android</span> <span class="o">=</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>This code imports the android module, which contains android-specific
+functionality. By catching the import error and later testing
+<tt class="docutils literal"><span class="pre">android</span></tt>, we can be sure it runs on the PC as well.</p>
+</div>
+<div class="section" id="lifecycle-management">
+<h2>Lifecycle Management<a class="headerlink" href="#lifecycle-management" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">android</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">android</span><span class="o">.</span><span class="n">check_pause</span><span class="p">():</span>
+        <span class="n">android</span><span class="o">.</span><span class="n">wait_for_resume</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>At any time, Android may ask that your game pause itself. This
+may occur when the user hits the pause button, when the device
+goes to sleep, or when the user switches to another application.</p>
+<p>You can check for a pause request using the <a class="reference internal" href="api.html#android.check_pause" title="android.check_pause"><tt class="xref py py-func docutils literal"><span class="pre">android.check_pause()</span></tt></a>
+function. If this returns true, you should prepare your game to sleep.
+When ready to sleep, call the <a class="reference internal" href="api.html#android.wait_for_resume" title="android.wait_for_resume"><tt class="xref py py-func docutils literal"><span class="pre">android.wait_for_resume()</span></tt></a> method.</p>
+<p>When in sleep mode, two things can happen. The first is that wait_for_resume
+returns. In that case, the game should resume itself. The second is that
+Android can choose to terminate the game, in which case a return to the
+game will cause the game to begin executing from the start.</p>
+<p>Since the game can be terminated wihout further notice while in sleep
+mode, it may make sense to save the game before calling
+wait_for_resume. The save can be deleted if wait_for_resume
+returns, or loaded when the game next starts.</p>
+<p>When in sleep mode, the game is expected to take up no CPU time.
+SDL timers are suspended automatically, but it may be necessary to
+suspend other Python threads.</p>
+</div>
+<div class="section" id="key-mapping">
+<h2>Key Mapping<a class="headerlink" href="#key-mapping" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">android</span><span class="p">:</span>
+    <span class="n">android</span><span class="o">.</span><span class="n">map_key</span><span class="p">(</span><span class="n">android</span><span class="o">.</span><span class="n">KEYCODE_BACK</span><span class="p">,</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_ESCAPE</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="api.html#android.map_key" title="android.map_key"><tt class="xref py py-func docutils literal"><span class="pre">android.map_key()</span></tt></a> function is used to map an Android keycode
+to a Pygame keysym. The Android keycodes are available as constants
+in the android module.</p>
+<p>A list of Android keycodes and their meanings can be found
+<a class="reference external" href="http://developer.android.com/reference/android/view/KeyEvent.html">here</a>.</p>
+</div>
+<div class="section" id="sound-and-music">
+<h2>Sound and Music<a class="headerlink" href="#sound-and-music" title="Permalink to this headline">¶</a></h2>
+<p>Although not used here, a big difference between the Pygame Subset and
+Pygame is the handling of sound and music. In Pygame Subset, sound
+playback is handled by the <a class="reference internal" href="api.html#module-android.mixer" title="android.mixer"><tt class="xref py py-mod docutils literal"><span class="pre">android.mixer</span></tt></a> module.</p>
+</div>
+<div class="section" id="hardware-support">
+<h2>Hardware Support<a class="headerlink" href="#hardware-support" title="Permalink to this headline">¶</a></h2>
+<p>Device hardware such as the vibrator and accelerometer are supoorted
+through the <a class="reference internal" href="api.html#module-android" title="android"><tt class="xref py py-mod docutils literal"><span class="pre">android</span></tt></a> module.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Writing a Game</a><ul>
+<li><a class="reference internal" href="#main">Main</a></li>
+<li><a class="reference internal" href="#importing-android">Importing Android</a></li>
+<li><a class="reference internal" href="#lifecycle-management">Lifecycle Management</a></li>
+<li><a class="reference internal" href="#key-mapping">Key Mapping</a></li>
+<li><a class="reference internal" href="#sound-and-music">Sound and Music</a></li>
+<li><a class="reference internal" href="#hardware-support">Hardware Support</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="android-packaging.html"
+                        title="previous chapter">Building Android Applications</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">API</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="android-packaging.html" title="Building Android Applications"
+             >previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010-2012, Tom Rothamel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

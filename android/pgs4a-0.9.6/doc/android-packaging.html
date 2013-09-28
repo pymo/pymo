@@ -1,0 +1,416 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building Android Applications &mdash; Pygame Subset for Android</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pygame Subset for Android" href="index.html" />
+    <link rel="next" title="Writing a Game" href="writing.html" />
+    <link rel="prev" title="Downloads" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="writing.html" title="Writing a Game"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Downloads"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="building-android-applications">
+<h1>Building Android Applications<a class="headerlink" href="#building-android-applications" title="Permalink to this headline">¶</a></h1>
+<p>PGS4A contains tools that help you take a packaging-centric approach
+to Android game development. In this approach, you will use a PC to
+build an Android package and upload it to your device. You can then
+run the game like any Android application. When it works correctly,
+you can upload the package you make to the Android Market or other app
+stores.</p>
+<p>Building your first package takes four steps:</p>
+<ol class="arabic simple">
+<li>Download and install PGS4A, Python 2.7, the Java Development Kit,
+and Android USB Drivers (scroll down for links).</li>
+<li>Use the <tt class="docutils literal"><span class="pre">android.py</span> <span class="pre">installsdk</span></tt> command to install the Android SDK and
+set up your development environment.</li>
+<li>Use the <tt class="docutils literal"><span class="pre">android.py</span> <span class="pre">configure</span></tt> command to configure
+Android-specific settings in your game.</li>
+<li>Use the <tt class="docutils literal"><span class="pre">android.py</span> <span class="pre">build</span></tt> command to build a package, and to
+install the package on your device.</li>
+</ol>
+<p>Once you&#8217;ve finished these four steps, you&#8217;ll have a runnable Android
+package. You&#8217;ll only need to run step 3 when you decide to make changes to your
+game&#8217;s configuration or when configuring a new game entirely; you&#8217;ll run step
+4 most often, whenever you need to make a new build of your game.</p>
+<div class="section" id="host-platform-support">
+<h2>Host Platform Support<a class="headerlink" href="#host-platform-support" title="Permalink to this headline">¶</a></h2>
+<p>We&#8217;ve tested PGS4A on Linux and Windows computers. While it should
+work on Mac OS X, we haven&#8217;t tested it there, so there may be problems
+encountered. The examples we give will be for Linux and Windows.</p>
+<p>The PGS4A tools are command-line based. We will try to assist you with
+examples to familiarize you with the command line on Windows.</p>
+</div>
+<div class="section" id="step-1-installing-pgs4a-and-its-dependencies">
+<h2>Step 1: Installing PGS4A and its Dependencies<a class="headerlink" href="#step-1-installing-pgs4a-and-its-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>There are four things you may need to manually download and install
+before you can run PGS4A:</p>
+<p><strong>Java Development Kit.</strong>
+The Java Development Kit (JDK) contains several tools that are used by
+PGS4A, including the tools used to generate keys and sign
+packages. It can be downloaded from:</p>
+<blockquote>
+<div><a class="reference external" href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</a></div></blockquote>
+<p>Please note that the developer-focused JDK is different from the
+user-focused JRE, and you&#8217;ll need the JDK to create Android packages.</p>
+<p><strong>Python 2.7.</strong>
+Python 2.7 is required to run the android.py script that&#8217;s
+included with PGS4A. It can be downloaded from:</p>
+<blockquote>
+<div><a class="reference external" href="http://python.org/download/releases/2.7.2/">http://python.org/download/releases/2.7.2/</a></div></blockquote>
+<p>PGS4A is not compatible with Python 3 at this time.</p>
+<p><strong>Android Device Drivers.</strong>
+On Windows, you may want to install a device driver to access
+your device, although this is not necessary. Links to android device drivers can be found at:</p>
+<blockquote>
+<div><a class="reference external" href="http://developer.android.com/sdk/oem-usb.html">http://developer.android.com/sdk/oem-usb.html</a></div></blockquote>
+<p>On Linux or OS X, you won&#8217;t need a device driver. If you can&#8217;t access
+your device, you may need to read:</p>
+<blockquote>
+<div><a class="reference external" href="http://developer.android.com/guide/developing/device.html#setting-up">http://developer.android.com/guide/developing/device.html#setting-up</a></div></blockquote>
+<p>However, modern versions of Linux and OS X should just work.</p>
+<p><strong>PGS4A Itself.</strong> The latest version of PGS4A can be downloaded from:</p>
+<blockquote>
+<div><a class="reference external" href="http://pygame.renpy.org/">http://pygame.renpy.org/</a></div></blockquote>
+<p>Once PGS4A has been downloaded, you should extract it using an
+archive program. The directory contained in that archive is what we
+will refer to as the PGS4A directory.</p>
+</div>
+<div class="section" id="aside-running-android-py">
+<h2>Aside: Running android.py<a class="headerlink" href="#aside-running-android-py" title="Permalink to this headline">¶</a></h2>
+<p>In this documentation, we&#8217;ll ask you to run the <tt class="docutils literal"><span class="pre">android.py</span></tt>
+command. The technique we use to run this varies based on the system
+you&#8217;re on.</p>
+<p>In all cases, you should run <tt class="docutils literal"><span class="pre">android.py</span></tt> from within the PGS4A
+directory. (That is, the directory containing <tt class="docutils literal"><span class="pre">android.py</span></tt> itself.)</p>
+<p>On Windows, to do this, you will need to open up the command line by pressing
+and holding down the Windows key and &#8216;R&#8217;. In the small window that pops up
+write &#8220;cmd&#8221; and press Enter. This should bring up the command line.</p>
+<p>To run the command from within the PGS4A directory you need to navigate to it
+from the command line. Find out where you extracted PGS4A and copy the path
+from Explorer (just click in the address bar so the path turns blue and
+press Ctrl+c). In the command prompt, write <tt class="docutils literal"><span class="pre">cd</span></tt> then a space, a
+double-quote, paste the path you just copied from Explorer (right click and
+choose <tt class="docutils literal"><span class="pre">paste</span></tt>), then another double-quote.</p>
+<p>Let&#8217;s assume you extracted PGS4A to C:\tools\PGS4A. In the command line write:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd &quot;C:\tools\PGS4A&quot;
+</pre></div>
+</div>
+<p>Now you&#8217;re within the PGS4A directory.</p>
+<p>On Windows, if the .py extension is registered to Python 2.7, you then can
+just run:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py test
+</pre></div>
+</div>
+<p>If you don&#8217;t know what the above means or you don&#8217;t want to do it, you
+will have to add the full path to Python to each command in
+the following steps of this guide beginning with &#8216;android.py&#8217;. If you
+installed Python to the default location, the above command would become:</p>
+<div class="highlight-none"><div class="highlight"><pre>C:\python27\python.exe android.py test
+</pre></div>
+</div>
+<p>If you installed Python to a different location, then find your Python install
+in Explorer, click in the address bar and copy the path, then replace
+<tt class="docutils literal"><span class="pre">C:\python27</span></tt> with the path you copied instead - leaving <tt class="docutils literal"><span class="pre">\python.exe</span></tt> on the</p>
+<p>end. So if your Python install is in <tt class="docutils literal"><span class="pre">C:\tools\python</span></tt>, you would type:</p>
+<div class="highlight-none"><div class="highlight"><pre>C:\tools\python\python.exe android.py test
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>If the path to Python that you copied has any spaces in - for example, if you had installed it in the
+<tt class="docutils literal"><span class="pre">Program</span> <span class="pre">Files</span></tt> directory - you will need to put double quotes at the beginning of the whole
+command and just after <tt class="docutils literal"><span class="pre">python.exe</span></tt>:</p>
+<div class="last highlight-none"><div class="highlight"><pre>&quot;C:\Program Files\Python\python.exe&quot; android.py test
+</pre></div>
+</div>
+</div>
+<p>On Linux, you may need to prefix the command with the current
+directory:</p>
+<div class="highlight-none"><div class="highlight"><pre>./android.py test
+</pre></div>
+</div>
+<p>For the rest of this documentation, we&#8217;ll just use <tt class="docutils literal"><span class="pre">android.py</span></tt> - if you had to include the path
+to Python in the example above, you will need to do the same thing every time you see <tt class="docutils literal"><span class="pre">android.py</span></tt>
+in these instructions.</p>
+</div>
+<div class="section" id="step-2-set-up-the-android-sdk-and-development-environment">
+<h2>Step 2: Set up the Android SDK and Development Environment<a class="headerlink" href="#step-2-set-up-the-android-sdk-and-development-environment" title="Permalink to this headline">¶</a></h2>
+<p>The next step is to set up the Android SDK and the rest of your
+development environment. This step will:</p>
+<ul class="simple">
+<li>Check that the JDK is installed properly.</li>
+<li>Install Apache Ant.</li>
+<li>Install the Android SDK.</li>
+<li>Use the Android SDK to install the appropriate development
+packages.</li>
+<li>Create a signing key that will be used to sign packages that are
+placed on the market (android.keystore: this will be generated in the PGS4A directory).</li>
+</ul>
+<p>This step requires Internet access.</p>
+<p>To perform this step, run:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py installsdk
+</pre></div>
+</div>
+<p>PGS4A will report on what it&#8217;s doing. It will also prompt you with
+warnings about licenses, and ask if you want it to generate a key.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>The key generated by PGS4A is created with a standard
+passphrase. You should really use keytool to generate your own
+signing keys.</p>
+<blockquote>
+<div><a class="reference external" href="http://docs.oracle.com/javase/1.3/docs/tooldocs/win32/keytool.html">http://docs.oracle.com/javase/1.3/docs/tooldocs/win32/keytool.html</a></div></blockquote>
+<p class="last">At the very least, you should keep the android.keyring file in
+a safe place. You should also back it up, because without the
+key, you won&#8217;t be able to upload the generated applications.</p>
+</div>
+<p>In the examples below, <tt class="docutils literal"><span class="pre">mygame</span></tt> is short for the path to the game
+you&#8217;re working on, relative to the current directory. When you make
+your own game, you should change <tt class="docutils literal"><span class="pre">mygame</span></tt> to something else.
+The easiest way to do this, of course, is to make a copy of your game&#8217;s
+directory inside the PGS4A directory and then replace <tt class="docutils literal"><span class="pre">mygame</span></tt> in
+the examples below with the name of your game&#8217;s directory.</p>
+</div>
+<div class="section" id="step-3-configure-your-game">
+<h2>Step 3: Configure Your Game<a class="headerlink" href="#step-3-configure-your-game" title="Permalink to this headline">¶</a></h2>
+<p>Before building a package, you must give PGS4A some information
+about your game. You can do this with the following command:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py configure mygame
+</pre></div>
+</div>
+<p>This will ask you a series of questions about your game, and store
+that information in a file in the game directory.</p>
+<p>If you need to change the information - for example, if you release a
+new version of your game - you can re-run the configure command. Your
+previous choices will be remembered.</p>
+</div>
+<div class="section" id="step-4-build-and-install-the-package">
+<h2>Step 4: Build and Install the Package<a class="headerlink" href="#step-4-build-and-install-the-package" title="Permalink to this headline">¶</a></h2>
+<p>Finally, you can build and install the package. This is done with a
+command like:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py build mygame release install
+</pre></div>
+</div>
+<p>This command will build a releasable version of your game, and then
+install it on the connected device. Please look at the output of this
+command to make sure it succeeds.</p>
+<p>Once the game successfully installs, you can touch its icon in your
+device&#8217;s launcher to start it running.</p>
+<p>If you&#8217;d rather just copy the game&#8217;s apk file to your Android device manually, you can just run:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py build mygame release
+</pre></div>
+</div>
+<p>Then navigate to the &#8216;bin&#8217; directory inside PGS4A and copy the file mygame-release.apk into your Android Device.
+You will then need to find the .apk file in your Android device using your file application and open it to install the</p>
+<p>game.</p>
+<p>The build command passes the options after the game name to the ant
+tool, which is responsible for creating the Android package. Other
+commands are also possible - for a list, run:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py build mygame help
+</pre></div>
+</div>
+</div>
+<div class="section" id="viewing-debug-output">
+<h2>Viewing Debug Output<a class="headerlink" href="#viewing-debug-output" title="Permalink to this headline">¶</a></h2>
+<p>To view debug output from your application, run the logcat command:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py logcat
+</pre></div>
+</div>
+<p>This command runs the <tt class="docutils literal"><span class="pre">adb</span> <span class="pre">logcat</span></tt> command in a mode that selects
+only Python output.</p>
+</div>
+<div class="section" id="troubleshooting-and-support">
+<h2>Troubleshooting and Support<a class="headerlink" href="#troubleshooting-and-support" title="Permalink to this headline">¶</a></h2>
+<p>Here&#8217;s a list of errors that you might encounter and possible solutions:</p>
+<p>When trying to run:</p>
+<div class="highlight-none"><div class="highlight"><pre>android.py test
+</pre></div>
+</div>
+<p>After having associated .py files with Python 2.7, if you get:</p>
+<div class="highlight-none"><div class="highlight"><pre>Traceback (most recent call last):
+File &quot;C:\Visual Novels and Games\rapt-6.13.11.0\android.py&quot;, line 9, in &lt;module&gt;
+    import subprocess
+File &quot;C:\Python27\lib\subprocess.py&quot;, line 444, in &lt;module&gt;
+    from _subprocess import CREATE_NEW_CONSOLE, CREATE_NEW_PROCESS_GROUP
+ImportError: cannot import name CREATE_NEW_PROCESS_GROUP
+</pre></div>
+</div>
+<p>This may be related to having more than one version of Python installed on your system.
+Try running android.py with the full path to Python, e.g.:</p>
+<div class="highlight-none"><div class="highlight"><pre>C:\python27\python.exe android.py test
+</pre></div>
+</div>
+<p>(If this works, then you will need to include the full path to Python in every command,
+as if you didn&#8217;t have the file type associated.)</p>
+<p>If while downloading Apache Ant you get:</p>
+<div class="highlight-none"><div class="highlight"><pre>IOError: [Errno socket error] [Errno 10054] An existing connection was forcibly
+closed by the remote host
+</pre></div>
+</div>
+<p>Just try installing the sdk again with the same command.</p>
+<p>If while configuring your game you get something like:</p>
+<div class="highlight-none"><div class="highlight"><pre>Tag &lt;manifest&gt; attribute package has invalid character &#39;-&#39;.
+</pre></div>
+</div>
+<p>You may have inserted an invalid character in the package name you used during
+configuration (in this case a hyphen &#8216;-&#8216;). You&#8217;ll have to use a different
+package name which does not contain anything other than letters and dots.</p>
+<p>If while configuring you get something like:</p>
+<div class="highlight-none"><div class="highlight"><pre>Traceback (most recent call last):
+File &quot;android.py&quot;, line 66, in &lt;module&gt;
+    main()
+File &quot;android.py&quot;, line 44, in main
+    configure.configure(iface, directory)
+File &quot;buildlib\configure.py&quot;, line 108, in configure
+    config.save(directory)
+File &quot;buildlib\configure.py&quot;, line 30, in save
+    with file(os.path.join(directory, &quot;.android.json&quot;), &quot;w&quot;) as f:
+IOError: [Errno 2] No such file or directory: &#39;mygame\\.android.json&#39;
+</pre></div>
+</div>
+<p>You should check whether you specified the correct path to your game directory. The easiest
+way to be sure is to put your game&#8217;s directory inside the PGS4A directory, and simply supply
+the name of your game&#8217;s directory. (If your game&#8217;s directory name has spaces, you may need
+to surround it with double quotes.)</p>
+<p>If building your game gives you an error like:</p>
+<blockquote>
+<div>Error: Target id android-8 is not valid. Use &#8216;android list targets&#8217; to get the target ids</div></blockquote>
+<p>You might want to check whether you have Android 2.2 (API 8) in the Android SDK manager.
+You can run it by navigating to the android-sdk/tools directory inside the PGS4A directory
+and run android.bat.</p>
+<img alt="_images/android_sdk_manager_001.jpg" class="align-center" src="_images/android_sdk_manager_001.jpg" />
+<p>If Android 2.2 (API 8) is missing like in the above image, click &#8216;Updates&#8217; and then &#8216;Install Updates&#8217;.</p>
+<p>Once the updates are installed, make sure Android 2.2 (API 8) and SDK platform are ticked:</p>
+<img alt="_images/android_sdk_manager_005.jpg" class="align-center" src="_images/android_sdk_manager_005.jpg" />
+<p>And install the packages. Then, try building your game again.</p>
+</div>
+<div class="section" id="expansion-apks">
+<h2>Expansion APKs<a class="headerlink" href="#expansion-apks" title="Permalink to this headline">¶</a></h2>
+<p>PGS4A optionally supports the use of expansion APKs when used on a
+device supporting Google Play. Please see:</p>
+<blockquote>
+<div><a class="reference external" href="http://developer.android.com/google/play/expansion-files.html">http://developer.android.com/google/play/expansion-files.html</a></div></blockquote>
+<p>For information about expansion APKs work. Right now, only the
+main expansion APK is supported, giving a 2GB limit.</p>
+<p>When an android APK is created, all assets (from the assets
+directory) are placed in the expansion APK. The assets can be
+accessed through the <a href="#id1"><span class="problematic" id="id2">:module:`android.assets`</span></a> interface.</p>
+<p>PGS4A will place the expansion APK on the device when installing
+the APK package on the device. In normal operation, Google Play will
+place the expansion APK on the device automatically.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building Android Applications</a><ul>
+<li><a class="reference internal" href="#host-platform-support">Host Platform Support</a></li>
+<li><a class="reference internal" href="#step-1-installing-pgs4a-and-its-dependencies">Step 1: Installing PGS4A and its Dependencies</a></li>
+<li><a class="reference internal" href="#aside-running-android-py">Aside: Running android.py</a></li>
+<li><a class="reference internal" href="#step-2-set-up-the-android-sdk-and-development-environment">Step 2: Set up the Android SDK and Development Environment</a></li>
+<li><a class="reference internal" href="#step-3-configure-your-game">Step 3: Configure Your Game</a></li>
+<li><a class="reference internal" href="#step-4-build-and-install-the-package">Step 4: Build and Install the Package</a></li>
+<li><a class="reference internal" href="#viewing-debug-output">Viewing Debug Output</a></li>
+<li><a class="reference internal" href="#troubleshooting-and-support">Troubleshooting and Support</a></li>
+<li><a class="reference internal" href="#expansion-apks">Expansion APKs</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Downloads</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="writing.html"
+                        title="next chapter">Writing a Game</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="writing.html" title="Writing a Game"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Downloads"
+             >previous</a> |</li>
+        <li><a href="index.html">Pygame Subset for Android</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010-2012, Tom Rothamel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
