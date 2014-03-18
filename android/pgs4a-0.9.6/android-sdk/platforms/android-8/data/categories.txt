@@ -1,0 +1,16 @@
+android.intent.category.ALTERNATIVE
+android.intent.category.BROWSABLE
+android.intent.category.CAR_DOCK
+android.intent.category.CAR_MODE
+android.intent.category.DEFAULT
+android.intent.category.DESK_DOCK
+android.intent.category.DEVELOPMENT_PREFERENCE
+android.intent.category.EMBED
+android.intent.category.HOME
+android.intent.category.INFO
+android.intent.category.LAUNCHER
+android.intent.category.MONKEY
+android.intent.category.OPENABLE
+android.intent.category.PREFERENCE
+android.intent.category.SELECTED_ALTERNATIVE
+android.intent.category.TAB

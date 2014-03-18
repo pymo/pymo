@@ -1031,6 +1031,15 @@ public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         return shader;
     }
 
+    static void playVideo(String s) {
+        Log.i("python", "Playing Video: " + s);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        String type = "video/mp4";
+        Uri name = Uri.parse(s);
+        intent.setDataAndType(name, type);
+        mActivity.startActivity(intent);
+    }
+
     private int createProgram(String vertexSource, String fragmentSource) {
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexSource);
         if (vertexShader == 0) {

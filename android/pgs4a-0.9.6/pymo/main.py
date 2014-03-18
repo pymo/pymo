@@ -54,11 +54,12 @@ class Keyboard(object):
         else:
             return [scancode]
     def handle_event(self):
-        global running, screensize, canvas, staticimg, bgmloop, sfx, anime, quitbind
+        global running, screensize, canvas, staticimg, anime, quitbind
         events  = pygame.event.get()
         if android:
             if android.check_pause():
                 if mixer.music.get_busy():
+                    print 'Pause music'
                     mixer.music.stop()
                     music_paused=True
                 else:
@@ -67,22 +68,23 @@ class Keyboard(object):
                 SE_STP()
                 android.wait_for_resume()
                 if music_paused:
-                    mixer.music.play()
+                    mixer.music.play(-1)
                 update_screen()
                 update_screen()
             #loop music
-            if bgmloop and (not mixer.music.get_busy()):
-                mixer.music.play()
+            mixer.periodic()
+            #if bgmloop and (not mixer.music.get_busy()):
+            #    mixer.music.play()
             #loop se
-            if (sfx['loop']) and (not get_busy_channel(sfx['channelid'])) and sfx['filename']!='':
-                if sfx['repeattime']<8:
-                    sfx['repeattime']+=1
-                    sfxsound=mixer.Sound(sfx['filename'])
-                    sfx['channelid']=sfxsound.play()
-                else:
-                    sfx['repeattime']=0
-                    sfx['loop']=False
-                    sfx['filename']=''
+##            if (sfx['loop']) and (not get_busy_channel(sfx['channelid'])) and sfx['filename']!='':
+##                if sfx['repeattime']<8:
+##                    sfx['repeattime']+=1
+##                    sfxsound=mixer.Sound(sfx['filename'])
+##                    sfx['channelid']=sfxsound.play()
+##                else:
+##                    sfx['repeattime']=0
+##                    sfx['loop']=False
+##                    sfx['filename']=''
         #draw anime
         if anime.ison():
             anime.draw()
@@ -481,8 +483,12 @@ def draw_paragraph(paragraph, topleft, bottomright, color, on_canvas=True):
         textorigin=(topleft[0],topleft[1]+(gameconfig[u'fontsize']+1)*(line_num))
         text = textfont.render(line, gameconfig[u'fontaa'], color)
         if bool(gameconfig[u'font']):
+            if (color[0]+color[1]+color[2]<256):#dark text, white shadow
+                basecolor=(255,255,255)
+            else:
+                basecolor=(0,0,0)
             baseorigin=(textorigin[0]+offset,textorigin[1]+offset)
-            base = textfont.render(line, gameconfig[u'fontaa'], (255-color[0],255-color[1],255-color[2]))
+            base = textfont.render(line, gameconfig[u'fontaa'], basecolor)
             staticimg['paragraph_img'].blit(base, baseorigin)
         staticimg['paragraph_img'].blit(text, textorigin)
         line_num+=1
@@ -683,7 +689,7 @@ def BGLoad(bgindex,bgfilename,percentorig=(0,0)):
             staticimg['bg']=load_image(os.path.join(GAME_PATH,'bg',bgfilename+gameconfig[u'bgformat']),imgtype='bg')
     save[u'bgpercentorig']=percentorig
     if percentorig!=(0,0):
-        bgorigin=( -percentorig[0]*get_image_width(staticimg['bg'])/100 , -percentorig[1]*get_image_height(staticimg['bg'])/100 )
+        bgorigin=( int(-percentorig[0]*get_image_width(staticimg['bg'])/100) , int(-percentorig[1]*get_image_height(staticimg['bg'])/100) )
     else:
         bgorigin=((screensize[0]-get_image_width(staticimg['bg']))/2, (screensize[1]-get_image_height(staticimg['bg']))/2)
 
@@ -791,7 +797,7 @@ def change_message_box(msgbox=u'message',namebox=u'name'):
     staticimg['message_name']=load_image(os.path.join(GAME_PATH,u'system',namebox+u'.png'), height=int(gameconfig[u'fontsize']*1.7),is_alpha=True)
 
 def BGMPlay(bgmfilename,playtime=0):
-    global save, gameconfig, bgmloop, bgmstart
+    global save, gameconfig, bgmstart
     try:
         if mixer.music.get_busy():
             mixer.music.stop()
@@ -806,15 +812,12 @@ def BGMPlay(bgmfilename,playtime=0):
         mixer.music.load(bgm_path)
         mixer.music.play(playtime-1)
         bgmstart=time.clock()
-        if playtime==0:
-            bgmloop=True
     except:
         print 'Error while playing bgm file'
 
 def BGMStop():
-    global save, bgmloop
+    global save
     save[u'bgm']=u''
-    bgmloop=False
     if mixer.music.get_busy():
         mixer.music.stop()
 
@@ -859,7 +862,7 @@ def SE_WAIT():
     if not sfx:
         return
     if not keyboard.is_down(key_codes.EScancode1):
-        while (not keyboard.pressed(key_codes.EScancodeSelect) and get_busy_channel(sfx['channelid']) and sfx['filename']!='' ) :
+        while (not keyboard.pressed(key_codes.EScancodeSelect) and get_busy_channel(sfx) ) :
             e32.ao_sleep(0.1)
             e32.reset_inactivity()
             end_time=time.clock()
@@ -876,19 +879,15 @@ def SE_STA(sefilename, duration=None, times=1):
                 print 'Can not find sound effect file'
                 return
         sfxsound=mixer.Sound(sepath)
-        sfx['channelid']=sfxsound.play()
-        sfx['filename']=sepath
-        if times==0:
-            sfx['loop']=True
+        sfx=sfxsound.play(times-1)
     except:
         print 'Error while playing se file'
 
 def SE_STP():
     global sfx
     try:
-        sfx['loop']=False
-        sfx['repeattime']=0
-        stop_channel(sfx['channelid'])
+        stop_channel(sfx)
+        sfx=None
     except:
         print 'Error while stopping se file'
 
@@ -1452,12 +1451,16 @@ class SelectImg(object):
             self.menuenable=True
         else:
             self.menuenable=False
+        if gameconfig[u'platform']==u'pygame':
+            imgset_size=2
+        else:
+            imgset_size=4
         for i in range(0, self.seqlen):
-            self.dstoriginlist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[2*i])/2,dstoriginlist[i][1]-get_image_height(self.imagelist[2*i])/2))
-            self.dstarealist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[2*i])/2,
-                                     dstoriginlist[i][1]-get_image_height(self.imagelist[2*i])/2,
-                                     dstoriginlist[i][0]+get_image_width(self.imagelist[2*i])/2,
-                                     dstoriginlist[i][1]+get_image_height(self.imagelist[2*i])/2))
+            self.dstoriginlist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[imgset_size*i])/2,dstoriginlist[i][1]-get_image_height(self.imagelist[imgset_size*i])/2))
+            self.dstarealist.append((dstoriginlist[i][0]-get_image_width(self.imagelist[imgset_size*i])/2,
+                                     dstoriginlist[i][1]-get_image_height(self.imagelist[imgset_size*i])/2,
+                                     dstoriginlist[i][0]+get_image_width(self.imagelist[imgset_size*i])/2,
+                                     dstoriginlist[i][1]+get_image_height(self.imagelist[imgset_size*i])/2))
             havetrue=havetrue or varlist[i]
         if not havetrue:
             for i in range(0, self.seqlen):
@@ -1887,8 +1890,8 @@ def SCROLL(length, bgfilename, startpos, endpos):
     else:
         length=float(length)/1000.0
     save[u'bgpercentorig']=endpos
-    startpos=(startpos[0]*get_image_width(staticimg['bg'])/100,startpos[1]*get_image_height(staticimg['bg'])/100)
-    endpos=(endpos[0]*get_image_width(staticimg['bg'])/100,endpos[1]*get_image_height(staticimg['bg'])/100)
+    startpos=(int(startpos[0]*get_image_width(staticimg['bg'])/100),int(startpos[1]*get_image_height(staticimg['bg'])/100))
+    endpos=(int(endpos[0]*get_image_width(staticimg['bg'])/100),int(endpos[1]*get_image_height(staticimg['bg'])/100))
     #draw charas on bg if any
     if need_draw_chara:
         if gameconfig[u'platform']==u'pygame':
@@ -1958,7 +1961,7 @@ def QUAKE():
 
 def ShowCalender(bgfilename,text_origin,color=(64,128,177)):
     global final_img,  in_fade_out, screensize, bgsize, gameconfig, staticimg, bgorigin
-    text_origin=pos_bg2screen((text_origin[0]*bgsize[0]/100,text_origin[1]*bgsize[1]/100))
+    text_origin=pos_bg2screen((int(text_origin[0]*bgsize[0]/100),int(text_origin[1]*bgsize[1]/100)))
     staticimg['oldimg'].blit(final_img,(0,0))
     staticimg['bg']=load_image(os.path.join(GAME_PATH,u'system',bgfilename+u'.png'))
     bgorigin=((screensize[0]-bgsize[0])/2, (screensize[1]-bgsize[1])/2)
@@ -2482,7 +2485,8 @@ def pos_screen2bg_y(pos_on_screen_y):
         return pos_on_screen_y
     else:
         return pos_on_screen_y-(screensize[1]-bgsize[1])/2
-
+def str_percent2pos(percent,full_len):
+    return int(float(percent)*float(full_len)/100.0)
 #set the position of chara. mode 0:upperleft, mode 1:uppermiddle, mode 2:upperright, 
 #                                             mode 3:middlemiddle, 
 #                           mode 4:lowerleft, mode 5:lowermiddle, mode 6:lowerright
@@ -2632,7 +2636,7 @@ def CHAQuake(chaindex_list,offsets,cycle=100):
         delay=float(cycle)/1000.0
         for offset in offsets:
             start_time=time.clock()
-            realoffset=(offset[0]*screensize[0]/540,offset[1]*screensize[1]/360)
+            realoffset=(int(offset[0]*screensize[0]/540),int(offset[1]*screensize[1]/360))
             for chaindex in chaindex_list:
                 CHAOffsetPos(chaindex,realoffset)
             CHADisp(transition=None)
@@ -4397,14 +4401,14 @@ def ScriptParsePYMO():
                     args.append(u'0')
                 if args[0].startswith(gameconfig[u'cgprefix']):
                     SetEVFlag(args[0])
-                BGLoad(0,args[0],(int(args[3]),int(args[4])))
+                BGLoad(0,args[0],(float(args[3]),float(args[4])))
                 BGDisp(0,transition=args[1], speed=args[2])
                 CHASetInvisible(u'a')
                 continue
             #scroll B34a,0,0,100,0,10000
             if command.startswith(u'#scroll '):
                 args=split_parameter(command,u'#scroll ')
-                SCROLL(int(args[5]),args[0],startpos=(int(args[1]),int(args[2])),endpos=(int(args[3]),int(args[4])))
+                SCROLL(int(args[5]),args[0],startpos=(float(args[1]),float(args[2])),endpos=(float(args[3]),float(args[4])))
                 if args[0].startswith(gameconfig[u'cgprefix']):
                     SetEVFlag(args[0])
                 continue
@@ -4439,7 +4443,7 @@ def ScriptParsePYMO():
                         CHAResetPos(args[i])
                     else:
                         CHAload(args[i],args[i+1])
-                        CHASetPos(args[i],int(args[i+2])*bgsize[0]/100)
+                        CHASetPos(args[i],str_percent2pos(args[i+2],bgsize[0]))
                         CHASetLayer(args[i],int(args[i+3]))
                         CHASetVisible(args[i])
                 CHADisp(length=int(args[len(args)-1]))
@@ -4455,7 +4459,7 @@ def ScriptParsePYMO():
                         if not save[u'chara'].has_key(args[i]):
                             save[u'chara'][args[i]]={}
                         CHAload(args[i],args[i+1])
-                        CHASetPos(args[i],int(args[i+2])*bgsize[0]/100,int(args[i+3])*bgsize[1]/100,int(args[0]))
+                        CHASetPos(args[i],str_percent2pos(args[i+2],bgsize[0]),str_percent2pos(args[i+3],bgsize[1]),int(args[0]))
                         CHASetLayer(args[i],int(args[i+4]))
                         CHASetVisible(args[i])
                 CHADisp(length=int(args[len(args)-1]))
@@ -4470,13 +4474,13 @@ def ScriptParsePYMO():
                     CHAload(args[1],args[2])
                     CHASetLayer(args[1],int(args[8]))
                     CHASetVisible(args[1])
-                    CHAScroll(args[1], int(args[9]), (int(args[3])*bgsize[0]/100,int(args[4])*bgsize[1]/100),
-                              (int(args[5])*bgsize[0]/100,int(args[6])*bgsize[1]/100), int(args[7]), int(args[0]))
+                    CHAScroll(args[1], int(args[9]), (str_percent2pos(args[3],bgsize[0]),str_percent2pos(args[4],bgsize[1])),
+                              (str_percent2pos(args[5],bgsize[0]),str_percent2pos(args[6],bgsize[1])), int(args[7]), int(args[0]))
                 elif len(args)==5:
                     if save[u'chara'].has_key(args[1]):
                         CHASetVisible(args[1])
                         CHAScroll(args[1], int(args[4]), CHAGetPos(args[1],int(args[0])),
-                                  (int(args[2])*bgsize[0]/100,int(args[3])*bgsize[1]/100), 0, int(args[0]))
+                                  (str_percent2pos(args[2],bgsize[0]),str_percent2pos(args[3],bgsize[1])), 0, int(args[0]))
                 continue
             #chara_pos 0,43
             if command.startswith(u'#chara_pos '):
@@ -4484,7 +4488,7 @@ def ScriptParsePYMO():
                 if len(args)==2:
                     args.append('0')
                     args.append('5')
-                CHASetPos(args[0],int(args[1])*bgsize[0]/100,int(args[2])*bgsize[1]/100,int(args[3]))
+                CHASetPos(args[0],str_percent2pos(args[1],bgsize[0]),str_percent2pos(args[2],bgsize[1]),int(args[3]))
                 CHADisp(transition=None)
                 continue
             #chara_cls
@@ -4519,7 +4523,7 @@ def ScriptParsePYMO():
                 j=int(args[2])
                 while j>0:
                     for i in range (3,len(args),2):
-                        offsets.append((int(args[i]),int(args[i+1])))
+                        offsets.append((float(args[i]),float(args[i+1])))
                     j-=1
                 CHAQuake([args[0]],offsets,int(args[1]))
                 continue
@@ -4573,9 +4577,11 @@ def ScriptParsePYMO():
                 if save[u'variables'].has_key(args[0]):
                     args[0]=str(save[u'variables'][args[0]]).decode('utf8')
                 if len(args)==5:
-                    ShowText(args[0],(int(args[1])*screensize[0]/100,int(args[2])*screensize[1]/100),bgsize,hexstr2color(args[3]),int(args[4]),True)
+                    ShowText(args[0],(str_percent2pos(args[1],screensize[0]),str_percent2pos(args[2],screensize[1])),bgsize,hexstr2color(args[3]),int(args[4]),True)
                 elif len(args)==8:
-                    ShowText(args[0],(int(args[1])*screensize[0]/100,int(args[2])*screensize[1]/100),(int(args[3])*screensize[0]/100,int(args[4])*screensize[1]/100),hexstr2color(args[5]),int(args[6]),bool(int(args[7])))
+                    ShowText(args[0],(str_percent2pos(args[1],screensize[0]),str_percent2pos(args[2],screensize[1])),
+                             (str_percent2pos(args[3],screensize[0]),str_percent2pos(args[4],screensize[1])),
+                             hexstr2color(args[5]),int(args[6]),bool(int(args[7])))
                 continue
             #text_off
             if command.startswith(u'#text_off'):
@@ -4672,7 +4678,7 @@ def ScriptParsePYMO():
             #date EYE_D,65,42,#000000
             if command.startswith(u'#date '):
                 args=split_parameter(command,u'#date ')
-                ShowCalender(args[0],(int(args[1]),int(args[2])),color=hexstr2color(args[3]))
+                ShowCalender(args[0],(float(args[1]),float(args[2])),color=hexstr2color(args[3]))
                 continue
             #wait 1000
             if command.startswith(u'#wait '):
@@ -4702,8 +4708,8 @@ def ScriptParsePYMO():
                 for i in range(1,int(args[0])+1):
                     selentry.append(args[i])
                 select_text=SelectText(selentry,
-                                       topleft=pos_bg2screen((int(args[i+1])*bgsize[0]/100,int(args[i+2])*bgsize[1]/100)),
-                                       bottomright=pos_bg2screen((int(args[i+3])*bgsize[0]/100,int(args[i+4])*bgsize[1]/100)),
+                                       topleft=pos_bg2screen((str_percent2pos(args[i+1],bgsize[0]),str_percent2pos(args[i+2],bgsize[1]))),
+                                       bottomright=pos_bg2screen((str_percent2pos(args[i+3],bgsize[0]),str_percent2pos(args[i+4],bgsize[1]))),
                                        textcolor=hexstr2color(args[i+5]),init_highlight=int(args[i+6]),hint=u'HINT_NONE')
                 save[u'variables']['FSEL']=select_text.select()
                 del selentry
@@ -4724,8 +4730,8 @@ def ScriptParsePYMO():
                         varentry.append(True)
                 i+=1
                 select_text=SelectText(selentry,
-                                       topleft=pos_bg2screen((int(args[i+1])*bgsize[0]/100,int(args[i+2])*bgsize[1]/100)),
-                                       bottomright=pos_bg2screen((int(args[i+3])*bgsize[0]/100,int(args[i+4])*bgsize[1]/100)),
+                                       topleft=pos_bg2screen((str_percent2pos(args[i+1],bgsize[0]),str_percent2pos(args[i+2],bgsize[1]))),
+                                       bottomright=pos_bg2screen((str_percent2pos(args[i+3],bgsize[0]),str_percent2pos(args[i+4],bgsize[1]))),
                                        textcolor=hexstr2color(args[i+5]),init_highlight=int(args[i+6]),hint=u'HINT_NONE',varlist=varentry)
                 save[u'variables']['FSEL']=select_text.select()
                 del selentry
@@ -4737,7 +4743,7 @@ def ScriptParsePYMO():
                 selentry=[]
                 varentry=[]
                 for i in range(2,3*int(args[0]),3):
-                    selentry.append(pos_bg2screen((int(args[i])*bgsize[0]/100,int(args[i+1])*bgsize[1]/100)))
+                    selentry.append(pos_bg2screen((str_percent2pos(args[i],bgsize[0]),str_percent2pos(args[i+1],bgsize[1]))))
                     if args[i+2].isdigit():
                         if int(args[i+2])==0:
                             varentry.append(False)
@@ -4761,7 +4767,7 @@ def ScriptParsePYMO():
                 varentry=[]
                 for i in range(1,4*int(args[0]),4):
                     filenameentry.append(args[i])
-                    selentry.append(pos_bg2screen((int(args[i+1])*bgsize[0]/100,int(args[i+2])*bgsize[1]/100)))
+                    selentry.append(pos_bg2screen((str_percent2pos(args[i+1],bgsize[0]),str_percent2pos(args[i+2],bgsize[1]))))
                     if args[i+3].isdigit():
                         if int(args[i+3])==0:
                             varentry.append(False)
@@ -4816,7 +4822,7 @@ def ScriptParsePYMO():
             #anime_on 3,rain,10,10,300,1
             if command.startswith(u'#anime_on '):
                 args=split_parameter(command,u'#anime_on ')
-                anime.on(args[1],int(args[0]),pos_bg2screen_x(int(args[2])*bgsize[0]/100),pos_bg2screen_y(int(args[3])*bgsize[1]/100),int(args[4]),bool(int(args[5])))
+                anime.on(args[1],int(args[0]),pos_bg2screen_x(str_percent2pos(args[2],bgsize[0])),pos_bg2screen_y(str_percent2pos(args[3],bgsize[1])),int(args[4]),bool(int(args[5])))
                 continue
             #anime_off rain
             if command.startswith(u'#anime_off '):
@@ -4841,18 +4847,17 @@ def ScriptParsePYMO():
 #Following is main function
 
 def main(platform='android'):
-    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,globalconfig,gameconfig,gameconfigbak,save,GAME_PATH,LOG_PATH,chara_on,f,sfx,bgmloop,bgmstart,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres
+    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,globalconfig,gameconfig,gameconfigbak,save,GAME_PATH,LOG_PATH,chara_on,f,sfx,bgmstart,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres
     final_img=None
     staticimg={'keypad':None}
     background=False
-    sfx={'channelid':None,'loop':False,'filename':'','repeattime':0}
-    bgmloop=False
+    sfx=None
     bgmstart=time.clock()
     vo=None
     f=None
     quitbind=True
     autosave=0
-    engineversion=1.0
+    engineversion=1.1
     gameconfig={u'font':1,u'fontaa':1,u'grayselected':1,u'hint':1,u'textspeed':3,u'textcolor':(255,255,255),u'cgprefix':u'EV_',
                 u'vovolume':0,u'bgmvolume':0,u'msgtb':(6,0),u'msglr':(10,7),u'anime':1,u'platform':'pygame',u'namealign':'middle'}
     gameconfigbak={}
@@ -4965,9 +4970,12 @@ def main(platform='android'):
         try:
             tempfile=file(LOG_PATH,'w')
             tempfile.close()
+            if not os.path.exists(os.path.join(GAME_PATH,u'save')):
+                os.makedirs(os.path.join(GAME_PATH,u'save'))
         except IOError:
             query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
         chara_on=False
+        #print len('\xB3\xC2\xD0\xC2\xC3\xF7'.decode('gbk'))
         if gameconfig.has_key(u'engineversion'):
             if float(gameconfig[u'engineversion'])>engineversion:
                 query(stringres[u'ERROR'],stringres[u'VERSION_LOW_1']+gameconfig[u'engineversion']+stringres[u'VERSION_LOW_2'],[stringres[u'OK']])

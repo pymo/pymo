@@ -25,7 +25,7 @@ import com.google.android.vending.expansion.downloader.IDownloaderClient;
 import com.google.android.vending.expansion.downloader.IDownloaderService;
 import com.google.android.vending.expansion.downloader.IStub;
 
-import org.renpy.android.R;
+import com.pymo.pymo.R;
 
 import android.app.Activity;
 import android.app.PendingIntent;
