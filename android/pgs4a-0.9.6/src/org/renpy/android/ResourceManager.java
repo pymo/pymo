@@ -9,6 +9,7 @@ package org.renpy.android;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 public class ResourceManager {
@@ -43,5 +44,13 @@ public class ResourceManager {
         int id = getIdentifier(name, "id");
         return v.findViewById(id);
     }
-    
+
+    public Drawable getDrawable(String name) {
+
+        try {
+            return res.getDrawable(getIdentifier(name, "drawable"));
+        } catch (Exception e) {
+            return null;
+        }
+    }    
 }

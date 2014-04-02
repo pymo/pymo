@@ -41,6 +41,8 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.graphics.PixelFormat;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import android.graphics.Bitmap;
@@ -674,19 +676,25 @@ public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     private void waitForStart() {
-
-        int presplashId = mResourceManager.getIdentifier("presplash", "drawable");
-        InputStream is = mActivity.getResources().openRawResource(presplashId);
-
-        Bitmap bitmap = null;
-        try {
-            bitmap = BitmapFactory.decodeStream(is);
-			bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) { }
-        }
+    	File bitmap_file= new File(mActivity.getFilesDir()+"/presplash.jpg");
+    	Log.v("SDLSurfaceView", "bitmap_file="+bitmap_file.getPath());
+    	Bitmap bitmap = null;
+    	try {
+    		FileInputStream is = new FileInputStream(bitmap_file);
+    		bitmap = BitmapFactory.decodeStream(is);            
+    		bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+    	} catch (Exception e) {
+    		int presplashId = mResourceManager.getIdentifier("presplash", "drawable");
+    		InputStream is1 = mActivity.getResources().openRawResource(presplashId);
+    		try {
+    			bitmap = BitmapFactory.decodeStream(is1);
+    			bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+    		} finally {
+    			try {
+    				is1.close();
+    			} catch (IOException e1) { }
+    		}
+    	}
 
         mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
                 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -1030,14 +1038,19 @@ public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         }
         return shader;
     }
-
-    static void playVideo(String s) {
-        Log.i("python", "Playing Video: " + s);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        String type = "video/mp4";
-        Uri name = Uri.parse(s);
-        intent.setDataAndType(name, type);
-        mActivity.startActivity(intent);
+    
+    static void playVideo(String filename) {
+    	try {
+    		String filename2 = filename.replace('\\', '/');
+    		Uri uri = Uri.parse(filename2);
+    		Intent i = new Intent(Intent.ACTION_VIEW);
+    		i.setDataAndType(uri, "video/mp4");
+    		mActivity.startActivityForResult(i, -1);
+    		mActivity.overridePendingTransition(android.R.anim.fade_in,
+    				android.R.anim.fade_out);
+    	} catch (Exception e) {
+    		Log.e("python", "playVideo error:  " + e.getClass().getName());
+    	}
     }
 
     private int createProgram(String vertexSource, String fragmentSource) {

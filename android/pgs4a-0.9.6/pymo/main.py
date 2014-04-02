@@ -859,7 +859,7 @@ def get_busy_channel(channel_id):
 def SE_WAIT():
     global sfx,keyboard
     #wait until the current se is stopped or key pressed
-    if not sfx:
+    if sfx==None:
         return
     if not keyboard.is_down(key_codes.EScancode1):
         while (not keyboard.pressed(key_codes.EScancodeSelect) and get_busy_channel(sfx) ) :
@@ -868,7 +868,7 @@ def SE_WAIT():
             end_time=time.clock()
 
 def SE_STA(sefilename, duration=None, times=1):
-    global sfx, gameconfig
+    global sfx, vo, gameconfig
     try:
         SE_STP()
         unpack_file(sefilename,u'seformat')
@@ -880,6 +880,9 @@ def SE_STA(sefilename, duration=None, times=1):
                 return
         sfxsound=mixer.Sound(sepath)
         sfx=sfxsound.play(times-1)
+        #set vo to None if sfx occupies vo's channel
+        if sfx==vo:
+            vo=None
     except:
         print 'Error while playing se file'
 
@@ -892,7 +895,7 @@ def SE_STP():
         print 'Error while stopping se file'
 
 def VO_STA(vofilename):
-    global vo,keyboard,gameconfig,cache
+    global vo,sfx,keyboard,gameconfig,cache
     try:
         if not keyboard.is_down(key_codes.EScancode1):
             vofilename=vofilename.upper()
@@ -913,6 +916,9 @@ def VO_STA(vofilename):
                 stop_channel(vo)
                 vosound=mixer.Sound(vopath)
             vo=vosound.play()
+            #set sfx to None if vo occupies sfx's channel
+            if vo==sfx:
+                sfx=None
     except:
         print 'Error while playing voice file'
 
@@ -2759,7 +2765,7 @@ def load_index(save_index):
     if len(args)==1:
         BGLoad(0,args[0])
     else:
-        BGLoad(0,args[0],(int(args[1]),int(args[2])))
+        BGLoad(0,args[0],(float(args[1]),float(args[2])))
     BGDisp(0,u'BG_NOFADE',u'BG_VERYFAST')
     #read chara
     CHASetInvisible(u'a')

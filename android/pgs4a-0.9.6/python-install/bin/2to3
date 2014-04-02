@@ -1,0 +1,5 @@
+#!/home/tom/ab/android/python-for-android/build/python-install/bin/python2.7
+import sys
+from lib2to3.main import main
+
+sys.exit(main("lib2to3.fixes"))

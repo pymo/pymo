@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/LinearLayout01"
+    android:layout_width="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="fill_parent"
+android:orientation="horizontal"
+>
+    <ImageView android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:maxHeight="60dp"
+        android:minHeight="40dp"         
+        android:id="@+id/ItemImage"
+	 />
+    <TextView android:layout_height="fill_parent"
+        android:textSize="16sp" android:layout_width="fill_parent"
+        android:layout_marginTop = "5sp"
+        android:layout_marginBottom = "5sp"
+        android:layout_marginLeft = "4sp"
+	android:gravity="center_vertical"
+	android:textColor="#FFFFFF"
+	android:shadowColor="#FFFFFF"
+        android:id="@+id/ItemTitle" />
+<!--         android:shadowDx="1" -->
+<!--         android:shadowDy="1" -->
+<!--         android:shadowRadius="2" -->
+
+ 
+</LinearLayout>
