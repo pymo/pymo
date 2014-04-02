@@ -18,4 +18,21 @@
 <string name="text_button_resume">Resume Download</string>
 <string name="text_button_cancel">Cancel</string>
 
+    <string name="info">pymo 1.1 beta 1\nby chen_xin_ming\n此版本为内部测试版本，请不要外传。\n\n更新内容：\n- 所有指令中的坐标都可以用小数表示，推荐2-3位小数\n- android: 底层升级为pgs4a 0.9.6，主要区别为使用了OpenGL ES2，系统要求Android 2.2及以上\n- android: 修正se循环时不能自动对话的问题\n- symbian: 修正#select_imgs指令的遮罩和坐标问题\n\n欢迎访问官方网站了解详情和下载游戏：http://pymo.github.io</string>
+    <string name="info_title">关于 pymo 1.1 beta1</string>
+    <string name="title_activity_file_chooser">FileChooser</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_config">pymo设置</string>
+    <string name="original_ratio">按原游戏画面比例显示</string>
+    <string name="keypad_extend">键盘包括菜单键和返回键</string>
+    <string name="keypad_horizontal">当原游戏比屏幕宽时自动将键盘置于画面下方</string>
+    <string name="player_external">使用外置播放器播放视频</string>
+    <string name="mplayer_pressagain">再次点击退出</string>
+    <string name="mplayer_invalidformat">视频格式不正确，播放已停止</string>
+    <string name="button_ok">确定</string>
+    <string name="button_visit_website">访问官网</string>
+    <string name="button_clipboard">复制到剪贴板</string>
+    <string name="clipboard_copied">已复制到剪贴板</string>
+    
+
 </resources>

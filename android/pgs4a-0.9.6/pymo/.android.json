@@ -1,1 +1,1 @@
-{"layout": "internal", "orientation": "landscape", "package": "com.pymo.pymo", "include_pil": false, "expansion": false, "name": "pymo", "source": false, "icon_name": "pymo", "version": "1.1.0", "permissions": ["VIBRATE"], "include_sqlite": false, "numeric_version": "10100"}
+{"orientation": "landscape", "include_pil": false, "expansion": false, "icon_name": "pymo", "include_sqlite": false, "permissions": ["INTERNET"], "layout": "internal", "name": "pymo", "package": "com.pymo.pymo", "source": false, "version": "1.1.0", "numeric_version": "10100"}

@@ -9,14 +9,11 @@
   <application android:label="@string/appName" 
                android:icon="@drawable/icon"
                >
-
-    <activity android:name="org.renpy.android.PythonActivity"
-              android:label="@string/iconName"
-              android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale|uiMode"
-              android:launchMode="singleTask"
+    <activity android:name="org.renpy.android.MainActivity"
+              android:configChanges="orientation|keyboardHidden"
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:process=":python"
-              android:screenOrientation="{{ config.orientation }}"
-              android:windowSoftInputMode="stateAlwaysHidden"
+              android:launchMode="singleTask"
             >
 {% if not config.expansion %}
       <intent-filter>
@@ -24,6 +21,23 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
 {% endif %}
+    </activity>
+
+    <activity android:name="org.renpy.android.FileChooser"
+              android:label="@string/title_activity_file_chooser" >
+    </activity>
+    <activity android:name="org.renpy.android.Config"
+              android:label="@string/title_activity_config" >
+    </activity>
+
+    <activity android:name="org.renpy.android.PythonActivity"
+              android:label="@string/iconName"
+              android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale|uiMode"
+              android:launchMode="singleInstance"
+              android:process=":python"
+              android:screenOrientation="{{ config.orientation }}"
+              android:windowSoftInputMode="stateAlwaysHidden"
+            >
     </activity>      
 
 {% if config.expansion %}

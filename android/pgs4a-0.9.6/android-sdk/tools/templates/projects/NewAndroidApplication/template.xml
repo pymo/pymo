@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<template
+    format="1"
+    revision="1"
+    name="New Android Application"
+    description="Creates a new Android application with an activity.">
+    <dependency name="android-support-v4" revision="8" />
+
+    <thumbs>
+        <thumb>template_new_project.png</thumb>
+    </thumbs>
+
+    <category value="Applications" />
+
+    <parameter
+        id="packageName"
+        name="Package name"
+        type="string"
+        constraints="package"
+        default="com.mycompany.myapp" />
+
+    <parameter
+        id="appTitle"
+        name="Application title"
+        type="string"
+        constraints="nonempty"
+        default="My Application" />
+
+    <parameter
+        id="minApi"
+        name="Minimum API level"
+        type="string"
+        constraints="apilevel"
+        default="7" />
+
+    <!--
+      Usually the same as minApi, but when minApi is a code name this will be the corresponding
+      API level
+    -->
+    <parameter
+        id="minApiLevel"
+        name="Minimum API level"
+        type="string"
+        constraints="apilevel"
+        default="7" />
+
+    <parameter
+        id="targetApi"
+        name="Target API level"
+        type="string"
+        constraints="apilevel"
+        default="15" />
+
+    <parameter
+        id="buildApi"
+        name="Build API level"
+        type="string"
+        constraints="apilevel"
+        default="15" />
+
+    <parameter
+        id="copyIcons"
+        name="Include launcher icons"
+        type="boolean"
+        default="true" />
+
+    <globals file="globals.xml.ftl" />
+    <execute file="recipe.xml.ftl" />
+
+</template>

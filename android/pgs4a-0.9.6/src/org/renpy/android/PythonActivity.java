@@ -77,35 +77,35 @@ public class PythonActivity extends Activity implements Runnable {
         //
         // Otherwise, we use the public data, if we have it, or the
         // private data if we do not.
-        if (getIntent().getAction().equals("org.renpy.LAUNCH")) {
-            mPath = new File(getIntent().getData().getSchemeSpecificPart());
+        //if (getIntent().getAction().equals("org.renpy.LAUNCH")) {
+        //    mPath = new File(getIntent().getData().getSchemeSpecificPart());
 
-            Project p = Project.scanDirectory(mPath);
+        //    Project p = Project.scanDirectory(mPath);
 
-            if (p != null) {
-                if (p.landscape) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                }
-            }
+        //    if (p != null) {
+        //        if (p.landscape) {
+        //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //        } else {
+        //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //        }
+        //    }
 
-            // Let old apps know they started.
-            try {
-                FileWriter f = new FileWriter(new File(mPath, ".launch"));
-                f.write("started");
-                f.close();
-            } catch (IOException e) {
-                // pass
-            }
+        //    // Let old apps know they started.
+        //    try {
+        //        FileWriter f = new FileWriter(new File(mPath, ".launch"));
+        //        f.write("started");
+        //        f.close();
+        //    } catch (IOException e) {
+        //        // pass
+        //    }
 
 
 
-        } else if (resourceManager.getString("public_version") != null) {
-            mPath = externalStorage;
-        } else {
-            mPath = getFilesDir();
-        }
+        //} else if (resourceManager.getString("public_version") != null) {
+        //    mPath = externalStorage;
+        //} else {
+        mPath = getFilesDir();
+        //}
 
         // go to fullscreen mode
         requestWindowFeature(Window.FEATURE_NO_TITLE);

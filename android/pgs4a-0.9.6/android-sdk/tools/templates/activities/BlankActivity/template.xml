@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<template
+    format="1"
+    revision="1"
+    name="New Blank Activity"
+    description="Creates a new blank activity, with optional inner navigation.">
+    <dependency name="android-support-v4" revision="8" />
+
+    <category value="Activities" />
+
+    <parameter
+        id="activityClass"
+        name="Activity Name"
+        type="string"
+        constraints="class|nonempty"
+        suggest="${layoutToActivity(layoutName)}"
+        default="MainActivity"
+        help="The name of the activity class to create" />
+
+    <parameter
+        id="layoutName"
+        name="Layout Name"
+        type="string"
+        constraints="layout|unique"
+        suggest="${activityToLayout(activityClass)}"
+        default="activity_main"
+        help="The name of the layout to create for the activity" />
+
+    <parameter
+        id="navType"
+        name="Navigation Type"
+        type="enum"
+        default="none"
+        help="The type of navigation to use for the activity" >
+        <option id="none" default="true">None</option>
+        <option id="tabs" minApi="14">Tabs</option>
+        <option id="tabs_pager" minApi="14">Tabs + Swipe</option>
+        <option id="pager_strip" minApi="14">Swipe Views + Title Strip</option>
+        <option id="dropdown" minApi="14">Dropdown</option>
+    </parameter>
+
+    <parameter
+        id="parentActivityClass"
+        name="Hierarchical Parent"
+        type="string"
+        constraints="activity|exists"
+        default=""
+        help="The hierarchical parent activity, used to provide a default implementation for the 'Up' button" />
+
+    <parameter
+        id="activityTitle"
+        name="Title"
+        type="string"
+        constraints="nonempty"
+        default="MainActivity"
+        suggest="${activityClass}"
+        help="The name of the activity. For launcher activities, the application title." />
+
+    <parameter
+        id="packageName"
+        name="Package name"
+        type="string"
+        constraints="package"
+        default="com.mycompany.myapp" />
+
+    <!-- 128x128 thumbnails relative to template.xml -->
+    <thumbs>
+        <!-- default thumbnail is required -->
+        <thumb>template_blank_activity.png</thumb>
+        <!-- attributes act as selectors based on chosen parameters -->
+        <thumb navType="none">template_blank_activity.png</thumb>
+        <thumb navType="tabs">template_blank_activity_tabs.png</thumb>
+        <thumb navType="tabs_pager">template_blank_activity_tabs_pager.png</thumb>
+        <thumb navType="pager_strip">template_blank_activity_pager.png</thumb>
+        <thumb navType="dropdown">template_blank_activity_dropdown.png</thumb>
+    </thumbs>
+
+    <globals file="globals.xml.ftl" />
+    <execute file="recipe.xml.ftl" />
+
+</template>
