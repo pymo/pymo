@@ -4962,8 +4962,8 @@ def main(platform='android'):
         try:
             read_game_config(GAME_PATH)
         except:
-            query(stringres[u'ERROR'],gamelist[gameid]+'/gameconfig.txt '+stringres[u'IS_BROKEN'],[stringres[u'OK']])
-            error_log("Error: "+ gamelist[gameid]+'/gameconfig.txt '+'is corrupted')
+            query(stringres[u'ERROR'],GAME_PATH+'/gameconfig.txt '+stringres[u'IS_BROKEN'],[stringres[u'OK']])
+            error_log("Error: "+ GAME_PATH+'/gameconfig.txt '+'is corrupted')
             pygame.quit()
             return
         #remove the log file in SD card's root dir

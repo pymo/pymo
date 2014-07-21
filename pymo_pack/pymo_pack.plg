@@ -1,0 +1,76 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: pymo_pack - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/pymo_pack.res" /d "NDEBUG" /d "_AFXDLL" "E:\projects\pymo_pack\pymo_pack.rc"" 
+Creating temporary file "F:\temp\RSPD82D.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Release/pymo_pack.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"E:\projects\pymo_pack\pymo_pack.cpp"
+"E:\projects\pymo_pack\pymo_packDlg.cpp"
+]
+Creating command line "cl.exe @F:\temp\RSPD82D.tmp" 
+Creating temporary file "F:\temp\RSPD82E.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Release/pymo_pack.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"E:\projects\pymo_pack\StdAfx.cpp"
+]
+Creating command line "cl.exe @F:\temp\RSPD82E.tmp" 
+Creating command line "link.exe /nologo /subsystem:windows /incremental:no /pdb:"Release/pymo_pack.pdb" /machine:I386 /out:"Release/pymo_pack.exe"  .\Release\pymo_pack.obj .\Release\pymo_packDlg.obj .\Release\StdAfx.obj .\Release\pymo_pack.res "
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+pymo_pack.cpp
+pymo_packDlg.cpp
+Generating Code...
+Linking...
+
+
+
+<h3>Results</h3>
+pymo_pack.exe - 0 error(s), 0 warning(s)
+<h3>
+--------------------Configuration: pymo_pack - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Debug/pymo_pack.res" /d "_DEBUG" /d "_AFXDLL" "E:\projects\pymo_pack\pymo_pack.rc"" 
+Creating temporary file "F:\temp\RSPE49E.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/pymo_pack.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"E:\projects\pymo_pack\pymo_pack.cpp"
+"E:\projects\pymo_pack\pymo_packDlg.cpp"
+]
+Creating command line "cl.exe @F:\temp\RSPE49E.tmp" 
+Creating temporary file "F:\temp\RSPE49F.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/pymo_pack.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"E:\projects\pymo_pack\StdAfx.cpp"
+]
+Creating command line "cl.exe @F:\temp\RSPE49F.tmp" 
+Creating command line "link.exe /nologo /subsystem:windows /incremental:yes /pdb:"Debug/pymo_pack.pdb" /debug /machine:I386 /out:"Debug/pymo_pack.exe" /pdbtype:sept  .\Debug\pymo_pack.obj .\Debug\pymo_packDlg.obj .\Debug\StdAfx.obj .\Debug\pymo_pack.res "
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+pymo_pack.cpp
+pymo_packDlg.cpp
+Generating Code...
+Linking...
+Creating command line "bscmake.exe /nologo /o"Debug/pymo_pack.bsc"  .\Debug\StdAfx.sbr .\Debug\pymo_pack.sbr .\Debug\pymo_packDlg.sbr"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+pymo_pack.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
