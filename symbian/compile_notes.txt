@@ -1,0 +1,6 @@
+========== To compile for S60 normal version ===========
+1. Install Python 2.5.2
+2. copy the platform-half-dependent and independent code from main.py to app.py
+3. Go to PythonForS60 directory
+4. edit create_sis.bat, set the path to python 2.5.2 and 7zip correctly
+5. run create_sis.bat, you will get a compiled zip.

@@ -10,7 +10,7 @@ ON,开启
 OFF,关闭
 SAVE,存档
 DONT_SAVE,不存档 
-READ_ONLY,游戏所在目录没有写入权限，可能造成游戏资源无法解压、无法存档等错误。请将游戏放在有写入权限的目录内。
+READ_ONLY,游戏所在目录没有写入权限，可能造成游戏资源无法解压、无法存档等错误。可以将游戏放在SD卡的Android\data\com.pymo.pymo\files\Games
 VERSION_LOW_1,运行这个游戏需要pymo 
 VERSION_LOW_2,或以上版本。请访问pymo.github.io下载最新版本。
 SCRIPT_ERROR_1,在执行脚本
