@@ -18,8 +18,8 @@
 <string name="text_button_resume">Resume Download</string>
 <string name="text_button_cancel">Cancel</string>
 
-    <string name="info">pymo 1.1 beta 1\nby chen_xin_ming\n此版本为内部测试版本，请不要外传。\n\n更新内容：\n- 所有指令中的坐标都可以用小数表示，推荐2-3位小数\n- android: 底层升级为pgs4a 0.9.6，主要区别为使用了OpenGL ES2，系统要求Android 2.2及以上\n- android: 修正se循环时不能自动对话的问题\n- symbian: 修正#select_imgs指令的遮罩和坐标问题\n\n欢迎访问官方网站了解详情和下载游戏：http://pymo.github.io</string>
-    <string name="info_title">关于 pymo 1.1 beta1</string>
+<string name="info">pymo 1.1\nby chen_xin_ming\n\n更新内容：\n- Android和Windows支持中文路径\n- 所有指令中的坐标都可以用小数表示，推荐2-3位小数\n- 修正选项处存档后无法触摸的问题\n- android: 底层更新为pgs4a 0.9.6，主要区别为使用了OpenGL ES2，系统要求Android 2.2及以上\n- android: 修正se循环时不能自动对话的问题\n- android: 针对Android 4.4以上无法写入外置SD存储的问题，pymo会在SD卡上建立/Android/data/com.pymo.pymo/files/Games目录。可以通过把游戏放到此文件夹下来绕过权限问题。\n- android: 修正第一次运行pymo提示gameconfig.txt损坏的问题。\n- Windows: 支持mp3格式音频播放\n- symbian: 修正#select_imgs指令的遮罩和坐标问题\n- symbian: 修正S60v5大于屏幕的bg渐变时键盘闪烁的问题\n\n欢迎访问官方网站了解详情和下载游戏：http://www.pymogames.com</string>
+    <string name="info_title">关于 pymo 1.1</string>
     <string name="title_activity_file_chooser">FileChooser</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_config">pymo设置</string>

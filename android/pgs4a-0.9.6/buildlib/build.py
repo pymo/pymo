@@ -348,7 +348,7 @@ def build(iface, directory, commands):
     iface.info("Updating build files.")
         
     # Update the project to a recent version.
-    subprocess.call([plat.android, "update", "project", "-p", '.', '-t', 'android-8', '-n', versioned_name,
+    subprocess.call([plat.android, "update", "project", "-p", '.', '-t', 'android-19', '-n', versioned_name,
         # "--library", "android-sdk/extras/google/play_licensing/library",
         "--library", "android-sdk/extras/google/play_apk_expansion/downloader_library",
         ])

@@ -65,7 +65,7 @@ public class Config extends Activity
 		builder.setNegativeButton(resourceManager.getString("button_visit_website"),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						Uri uri = Uri.parse("http://pymo.github.io");
+						Uri uri = Uri.parse("http://www.pymogames.com");
 						Intent web = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(web);
 					}

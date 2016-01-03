@@ -1,0 +1,73 @@
+====== How to compile in Ubuntu =====
+Modify pgs4a-0.9.6/templates/strings.xml
+./android.py configure pymo
+./android.py build pymo debug
+./android.py build pymo release
+
+====== How did I modify the pgs4a ======
+Use git to clone the RAPT source code from:
+
+git clone git://github.com/renpy/rapt.git
+
+Run 
+git submodule init 
+inside the rapt directory to download our branch of python-for-android.
+
+git clone https://github.com/renpytom/python-for-android.git
+
+Download the Android SDK, and place it in rapt/android-sdk. Ensure that the Android 2.2 SDK is downloaded.
+
+Download the Android NDK revison 8c, and place it in rapt/android-ndk-r8c.
+
+    Change into the rapt directory, and run ./build_pgs4a.sh. This should build PGS4A automatically, and place the result in dist/pgs4a.
+
+We recommend installing ccache to speed up subsequent builds.
+
+vim python-for-android/recipes/android/src/core.pyx
+
+#Video Playing
+cdef extern void android_play_video(char *url)
+
+def play_video(url):
+    android_play_video(url)
+
+vim python-for-android/recipes/android/src/android_jni.c
+
+void android_play_video(char *url) {
+    static JNIEnv *env = NULL;
+    static jclass *cls = NULL;
+    static jmethodID mid = NULL;
+
+    if (env == NULL) {
+        env = SDL_ANDROID_GetJNIEnv();
+        aassert(env);
+        cls = (*env)->FindClass(env, "org/renpy/android/SDLSurfaceView");
+        aassert(cls);
+        mid = (*env)->GetStaticMethodID(env, cls, "playVideo", "(Ljava/lang/String;)V");
+        aassert(mid);
+    }
+
+    PUSH_FRAME;
+
+    (*env)->CallStaticVoidMethod(
+        env, cls, mid,
+        (*env)->NewStringUTF(env, url)
+        );
+
+    POP_FRAME;
+}
+
+uninstall cython and:
+sudo pip install Cython==0.17.1
+
+vim src/org/renpy/android/SDLSurfaceView.java
+import android.content.Intent;
+    static void playVideo(String s) {
+        Log.i("python", "Playing Video: " + s);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        String type = "video/mp4";
+        Uri name = Uri.parse(s);
+        intent.setDataAndType(name, type);
+        mActivity.startActivity(intent);
+    }
+
