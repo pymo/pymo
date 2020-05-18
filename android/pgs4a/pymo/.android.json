@@ -1,0 +1,1 @@
+{"orientation": "sensorLandscape", "include_pil": false, "expansion": false, "icon_name": "pymo", "targetsdk": "28", "include_sqlite": false, "permissions": ["WAKE_LOCK", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"], "layout": "internal", "name": "pymo", "package": "com.pymo.pymo", "source": false, "version": "1.2.0", "numeric_version": "10200"}

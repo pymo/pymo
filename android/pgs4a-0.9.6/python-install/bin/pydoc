@@ -1,5 +1,0 @@
-#!/home/tom/ab/android/python-for-android/build/python-install/bin/python2.7
-
-import pydoc
-if __name__ == '__main__':
-    pydoc.cli()

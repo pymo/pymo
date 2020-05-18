@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	  xmlns:tools="http://schemas.android.com/tools"
+          package="{{config.package}}"
+          android:versionCode="{{config.numeric_version}}"
+          android:versionName="{{config.version}}"
+          >
+   <application android:label="@string/appName" 
+               android:icon="@mipmap/ic_launcher"
+	       android:fullBackupContent="@xml/backup"
+               android:resizeableActivity="true"
+               >
+    <activity android:name="org.renpy.android.MainActivity"
+              android:configChanges="orientation|keyboardHidden"
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+              android:process=":python"
+              android:launchMode="singleTask"
+            >
+{% if not config.expansion %}
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+{% endif %}
+    </activity>
+
+    <activity android:name="org.renpy.android.FileChooser"
+              android:label="@string/title_activity_file_chooser" >
+    </activity>
+    <activity android:name="org.renpy.android.Config"
+              android:label="@string/title_activity_config" >
+    </activity>
+
+    <activity android:name="org.renpy.android.PythonActivity"
+              android:label="@string/iconName"
+              android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale|uiMode|screenSize"
+              android:launchMode="singleTask"
+              android:process=":python"
+              android:screenOrientation="{{ config.orientation }}"
+              android:windowSoftInputMode="stateAlwaysHidden"
+            >
+    </activity>
+
+{% if config.expansion %}
+       <activity
+           android:label="@string/iconName"
+           android:name="org.renpy.android.DownloaderActivity" >
+           <intent-filter >
+               <action android:name="android.intent.action.MAIN" />
+               <category android:name="android.intent.category.LAUNCHER" />
+           </intent-filter>
+       </activity>
+
+       <service android:name="org.renpy.android.DownloaderService" />
+       <receiver android:name="org.renpy.android.DownloaderAlarmReceiver" />
+{% endif %}
+
+  <provider
+    android:name="android.support.v4.content.FileProvider"
+    android:authorities="{{config.package}}.PythonActivity"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+  </provider>
+
+  <meta-data android:name="android.max_aspect" android:value="2.5" />
+
+  </application>
+
+  <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+  <uses-feature android:name="android.hardware.touchscreen"
+                  required="false" />
+  <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="{{config.targetsdk}}"/>
+
+  {% if config.expansion %}
+    <uses-permission android:name="com.android.vending.CHECK_LICENSE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+  {% endif %}
+  {% for perm in config.permissions %}
+  <uses-permission android:name="android.permission.{{ perm }}" />
+  {% endfor %}
+{{ manifest_extra }}
+
+   <supports-screens android:largeScreens="true" />
+   <supports-screens android:xlargeScreens="true" />
+</manifest> 

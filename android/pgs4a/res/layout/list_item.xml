@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/LinearLayout01"
+    android:layout_width="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="fill_parent"
+>
+    <ImageView
+       	android:layout_width="35dp"
+        android:layout_height="35dp"
+	android:scaleType="fitXY"
+        android:layout_alignParentLeft="true"
+	android:layout_centerVertical="true"
+ 	android:id="@+id/ItemImage"
+    />
+    <TextView
+        android:layout_height="fill_parent"
+	android:layout_toRightOf="@id/ItemImage"
+	android:layout_centerVertical="true"
+	android:textSize="20dp"
+	android:layout_width="fill_parent"
+        android:layout_marginTop = "6dp"
+        android:layout_marginBottom = "6dp"
+        android:layout_marginLeft = "5dp"
+	android:gravity="center_vertical"
+	android:textColor="#FFFFFF"
+	android:shadowColor="#FFFFFF"
+	android:id="@+id/ItemTitle"
+    />
+<!--         android:shadowDx="1" -->
+<!--         android:shadowDy="1" -->
+<!--         android:shadowRadius="2" -->
+<!--    android:maxHeight="60dp" -->
+
+<!--	android:minHeight="40dp" -->
+ 
+</RelativeLayout>
