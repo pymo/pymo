@@ -1,13 +1,13 @@
-Ê¹ÓÃS60V3 MR°æ±¾µÄÊÖ»úÓÉÓÚ²»Ö§³Öpython 2.0.0£¬ÎÞ·¨°²×°ÆÕÍ¨°æ±¾µÄpymo¡£Õâ¸ö°æ±¾µÄpymoÊÇ×¨ÃÅÎªS60V3 MRÏµÍ³ÖÆ×÷µÄ¡£ºÍÆÕÍ¨°æ±¾µÄpymoµÄÇø±ðÊÇ£º
-- »ùÓÚpython 1.9.6´ò°ü
-- Ç¿ÖÆ¹Ø±Õ×ÊÔ´Ô¤È¡¹¦ÄÜÒÔ½ÚÊ¡ÄÚ´æ
+ï»¿ä½¿ç”¨S60V3 MRç‰ˆæœ¬çš„æ‰‹æœºç”±äºŽä¸æ”¯æŒpython 2.0.0ï¼Œæ— æ³•å®‰è£…æ™®é€šç‰ˆæœ¬çš„pymoã€‚è¿™ä¸ªç‰ˆæœ¬çš„pymoæ˜¯ä¸“é—¨ä¸ºS60V3 MRç³»ç»Ÿåˆ¶ä½œçš„ã€‚å’Œæ™®é€šç‰ˆæœ¬çš„pymoçš„åŒºåˆ«æ˜¯ï¼š
+- åŸºäºŽpython 1.9.6æ‰“åŒ…
+- å¼ºåˆ¶å…³é—­èµ„æºé¢„å–åŠŸèƒ½ä»¥èŠ‚çœå†…å­˜
 
-°²×°·½·¨£º
-1.Èç¹ûÖ®Ç°°²×°¹ýpips¡¢pythonºÍpymo£¬È«²¿É¾³ý¸É¾»¡£
-2.ÒÀ´ÎÔÚÊÖ»úÉÏ°²×°ÓÎÏ·ÒýÇæÑ¹Ëõ°üÀïµÄPython_1.9.6_fixed.sis ºÍ pymo_v1_1_0_S60_MR.sis
+å®‰è£…æ–¹æ³•ï¼š
+1.å¦‚æžœä¹‹å‰å®‰è£…è¿‡pipsã€pythonå’Œpymoï¼Œå…¨éƒ¨åˆ é™¤å¹²å‡€ã€‚
+2.ä¾æ¬¡åœ¨æ‰‹æœºä¸Šå®‰è£…æ¸¸æˆå¼•æ“ŽåŽ‹ç¼©åŒ…é‡Œçš„Python_1.9.6_fixed.sis å’Œ pymo_v1_2_0_S60_MR.sis
 
-Ê¹ÓÃS60V3 MR°æ±¾µÄÊÖ»úÓÐ£º
-¡¡¡¡3250XM¡¢5500 Sports¡¢E50¡¢E60¡¢E61¡¢
-¡¡¡¡E61i¡¢E62¡¢E65¡¢E70¡¢N71¡¢N73¡¢N75¡¢
-¡¡¡¡N77¡¢N80¡¢N91¡¢N91(8G)¡¢N93¡¢N93i
-µ«ÊÇ×¢ÒâÖ»ÓÐÆÁÄ»·Ö±æÂÊÎª320*240µÄÊÖ»ú²ÅÄÜÕý³£ÓÎÏ·¡£Çë±£Ö¤¿ÕÏÐÄÚ´æ´óÓÚ14M£¬·ñÔòÓÐ¿ÉÄÜÔÚÔËÐÐ¹ý³ÌÖÐÌø³ö¡£
+ä½¿ç”¨S60V3 MRç‰ˆæœ¬çš„æ‰‹æœºæœ‰ï¼š
+ã€€ã€€3250XMã€5500 Sportsã€E50ã€E60ã€E61ã€
+ã€€ã€€E61iã€E62ã€E65ã€E70ã€N71ã€N73ã€N75ã€
+ã€€ã€€N77ã€N80ã€N91ã€N91(8G)ã€N93ã€N93i
+ä½†æ˜¯æ³¨æ„åªæœ‰å±å¹•åˆ†è¾¨çŽ‡ä¸º320*240çš„æ‰‹æœºæ‰èƒ½æ­£å¸¸æ¸¸æˆã€‚è¯·ä¿è¯ç©ºé—²å†…å­˜å¤§äºŽ14Mï¼Œå¦åˆ™æœ‰å¯èƒ½åœ¨è¿è¡Œè¿‡ç¨‹ä¸­è·³å‡ºã€‚

@@ -19,7 +19,7 @@ class Sound(object):
         return self
 
     def _play(self, loops):
-        dm= pymedia.muxer.Demuxer( str.split( self.name, '.' )[ -1 ].lower() )
+        dm= pymedia.muxer.Demuxer( self.name.split('.')[ -1 ].lower() )
         snds= pymedia.audio.sound.getODevices()
         card =0
         f= open( self.name, 'rb' )

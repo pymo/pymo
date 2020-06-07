@@ -1,5 +1,6 @@
 import pygame, sys, random, time, codecs, string, os, random, struct
 import key_codes, e32
+import shutil
 from pygame.locals import *
 import traceback
 try:
@@ -29,18 +30,18 @@ class Keyboard(object):
         self.keyrects=[]
         if globalconfig['keypad_bottom']==0:
             if globalconfig['keypad_num']==7:
-                self.button_codes=[pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+                self.button_codes=[pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_RETURN,pygame.K_DOWN]
             else:
-                self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+                self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_RETURN,pygame.K_DOWN]
             for i in range(0,globalconfig['keypad_num']):
                 self.keyrects.append((screensize[0],int(screensize[1]*i/globalconfig['keypad_num']),screensize[0]+keypadsize[0],int(screensize[1]*(i+1)/globalconfig['keypad_num'])))
         else:
-            self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_SPACE,pygame.K_DOWN]
+            self.button_codes=[pygame.K_ESCAPE,pygame.K_0,pygame.K_1,pygame.K_3,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_UP,pygame.K_RETURN,pygame.K_DOWN]
             for i in range(0,globalconfig['keypad_num']):
                 self.keyrects.append((int(screensize[0]*i/globalconfig['keypad_num']),screensize[1],int(screensize[0]*(i+1)/globalconfig['keypad_num']),screensize[1]+keypadsize[1]))
     def key_map(self, scancode):
         if scancode==key_codes.EScancodeSelect:
-            return [key_codes.EScancodeSelect,key_codes.EScancode5, pygame.K_RETURN, pygame.K_SPACE]
+            return [key_codes.EScancodeSelect,key_codes.EScancode5, pygame.K_RETURN]
         elif scancode==key_codes.EScancodeUpArrow:
             return [key_codes.EScancodeUpArrow,key_codes.EScancode2]
         elif scancode==key_codes.EScancodeDownArrow:
@@ -50,13 +51,13 @@ class Keyboard(object):
         elif scancode==key_codes.EScancodeRightArrow:
             return [key_codes.EScancodeRightArrow,key_codes.EScancode6]
         elif scancode==key_codes.EScancode1:
-            return [key_codes.EScancode1,pygame.K_LCTRL]
+            return [key_codes.EScancode1,pygame.K_LCTRL,pygame.K_SPACE]
         elif scancode==key_codes.EScancode0:
-            return [key_codes.EScancode0,pygame.K_F4]
+            return [key_codes.EScancode0,pygame.K_BACKSPACE]
         else:
             return [scancode]
     def handle_event(self):
-        global running, screensize, canvas, staticimg, anime, quitbind
+        global running, screensize, canvas, staticimg, anime, quitbind, bgmloop
         events  = pygame.event.get()
         if android:
             if android.check_pause():
@@ -73,11 +74,10 @@ class Keyboard(object):
                 update_screen()
                 update_screen()
             #loop music
-            mixer.periodic()
-            #if bgmloop and (not mixer.music.get_busy()):
-            #    mixer.music.play()
+            if bgmloop and (not mixer.music.get_busy()):
+                mixer.music.play()
             #loop se
-##            if (sfx['loop']) and (not get_busy_channel(sfx['channelid'])) and sfx['filename']!='':
+            mixer.periodic()
 ##                if sfx['repeattime']<8:
 ##                    sfx['repeattime']+=1
 ##                    sfxsound=mixer.Sound(sfx['filename'])
@@ -178,7 +178,7 @@ class Keyboard(object):
             if pos[0]>keyrect[0] and pos[0]<keyrect[2] and pos[1]>keyrect[1] and pos[1]<keyrect[3]:
                 return self.button_codes[i]
         if quitbind:
-            return pygame.K_SPACE
+            return pygame.K_RETURN
         else:
             return pygame.K_RCTRL
     def draw_rect(self,pos):
@@ -688,8 +688,8 @@ def BGLoad(bgindex,bgfilename,percentorig=(0,0)):
             if cache['bg'][bgfilename]['usetime']==0:
                 del cache['bg'][bgfilename]
         else:
-            unpack_file(bgfilename,u'bgformat')
-            staticimg['bg']=load_image(os.path.join(GAME_PATH,'bg',(bgfilename.encode('utf8'))+gameconfig[u'bgformat']),imgtype='bg')
+            full_filename = unpack_file(bgfilename,u'bgformat')
+            staticimg['bg']=load_image(full_filename, imgtype='bg')
     save[u'bgpercentorig']=percentorig
     if percentorig!=(0,0):
         bgorigin=( int(-percentorig[0]*get_image_width(staticimg['bg'])/100) , int(-percentorig[1]*get_image_height(staticimg['bg'])/100) )
@@ -800,7 +800,7 @@ def change_message_box(msgbox='message',namebox='name'):
     staticimg['message_name']=load_image(os.path.join(GAME_PATH,'system',(namebox.encode('utf8'))+'.png'), height=int(gameconfig[u'fontsize']*1.7),is_alpha=True)
 
 def BGMPlay(bgmfilename,playtime=0):
-    global save, gameconfig, bgmstart
+    global save, gameconfig, bgmstart, bgmloop
     try:
         if mixer.music.get_busy():
             mixer.music.stop()
@@ -812,14 +812,16 @@ def BGMPlay(bgmfilename,playtime=0):
             print 'Can not find bgm file'
             return
         mixer.music.load(bgm_path)
+        bgmloop = (playtime == 0)
         mixer.music.play(playtime-1)
         bgmstart=time.time()
     except:
         print 'Error while playing bgm file'
 
 def BGMStop():
-    global save
+    global save, bgmloop
     save[u'bgm']=u''
+    bgmloop = False
     if mixer.music.get_busy():
         mixer.music.stop()
 
@@ -838,23 +840,13 @@ def delay_until(end_time):
 
 def stop_channel(channel_id):
     try:
-        if android:
-            if channel_id!=None:
-                mixer.Channel(channel_id).stop()
-        else:
-            channel_id.stop()
+        channel_id.stop()
     except:
         print 'Error while stopping channel',channel_id
 
 def get_busy_channel(channel_id):
     try:
-        if android:
-            if channel_id!=None:
-                return mixer.Channel(channel_id).get_busy()
-            else:
-                return False
-        else:
-            return channel_id.get_busy()
+        return channel_id.get_busy()
     except:
         return False
 
@@ -873,19 +865,18 @@ def SE_STA(sefilename, duration=None, times=1):
     global sfx, vo, gameconfig
     try:
         SE_STP()
-        unpack_file(sefilename,u'seformat')
-        sepath=os.path.join(GAME_PATH,'se',(sefilename.encode('utf8'))+gameconfig[u'seformat'])
-
+        sefilename=sefilename.upper()
+        sepath=unpack_file(sefilename,u'seformat')
         if not os.path.exists(sepath):
                 print 'Can not find sound effect file'
                 return
         sfxsound=mixer.Sound(sepath)
         sfx=sfxsound.play(times-1)
         #set vo to None if sfx occupies vo's channel
-        if sfx==vo:
-            vo=None
+        #if sfx==vo:
+        #    vo=None
     except:
-        print 'Error while playing se file'
+        error_log(traceback.format_exc())
 
 def SE_STP():
     global sfx
@@ -893,7 +884,7 @@ def SE_STP():
         stop_channel(sfx)
         sfx=None
     except:
-        print 'Error while stopping se file'
+        error_log(traceback.format_exc())
 
 def VO_STA(vofilename):
     global vo,sfx,keyboard,gameconfig,cache
@@ -907,8 +898,7 @@ def VO_STA(vofilename):
                 if cache['vo'][vofilename]['usetime']==0:
                     del cache['vo'][vofilename]
             else:
-                unpack_file(vofilename,u'voiceformat')
-                vopath=os.path.join(GAME_PATH,'voice',(vofilename.encode('utf8'))+gameconfig[u'voiceformat'])
+                vopath=unpack_file(vofilename,u'voiceformat')
 
                 if not os.path.exists(vopath):
                     print 'Can not find voice file'
@@ -917,8 +907,8 @@ def VO_STA(vofilename):
                 vosound=mixer.Sound(vopath)
             vo=vosound.play()
             #set sfx to None if vo occupies sfx's channel
-            if vo==sfx:
-                sfx=None
+            #if vo==sfx:
+            #    sfx=None
     except:
         print 'Error while playing voice file'
 
@@ -998,7 +988,16 @@ def query(title_text,text,buttons):
     while looping:
         events  = pygame.event.get()
         for ev in events :
-            if ev.type == pygame.MOUSEBUTTONUP:
+            if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_ESCAPE:
+                    ret = n-1
+                    looping = False
+                    break
+                elif ev.key == pygame.K_RETURN:
+                    ret = 0
+                    looping = False
+                    break
+            elif ev.type == pygame.MOUSEBUTTONUP:
                 if ev.button==1:
                     for i in range(0,n):
                         if buttonrects[i].collidepoint(ev.pos):
@@ -1067,21 +1066,20 @@ def cache_add(type,filename,cache_pos,bak_pos):
         cache[type][filename]['usetime']+=1
     else:
         if type=='bg':
-            unpack_file(filename,u'bgformat')
-            temp_bg=load_image(os.path.join(GAME_PATH,'bg',(filename.encode('utf8'))+gameconfig[u'bgformat']))
+            full_filename = unpack_file(filename,u'bgformat')
+            temp_bg=load_image(full_filename)
             cache[type][filename]={'res':temp_bg, 'cache_pos':cache_pos, 'usetime':1}
         if type=='chara':
-            unpack_file(filename,u'charaformat')
-            temp_chara=load_image(os.path.join(GAME_PATH,'chara',(filename.encode('utf8'))+gameconfig[u'charaformat']),is_alpha=True)
+            full_filename = unpack_file(filename,u'charaformat')
+            temp_chara=load_image(full_filename,is_alpha=True)
             cache[type][filename]={'res':temp_chara, 'cache_pos':cache_pos, 'usetime':1}
         if type=='vo':
-            filename=filename.upper()
-            unpack_file(filename,u'voiceformat')
-            if not os.path.exists(os.path.join(GAME_PATH,'voice',(filename.encode('utf8'))+gameconfig[u'voiceformat'])):
-                print 'Can not find voice file',filename
+            full_filename = unpack_file(filename,u'voiceformat')
+            if not os.path.exists(full_filename):
+                print 'Can not find voice file',full_filename
                 return
             try:
-                temp_vo=mixer.Sound(os.path.join(GAME_PATH,'voice',(filename.encode('utf8'))+gameconfig[u'voiceformat']))
+                temp_vo=mixer.Sound(full_filename)
                 cache[type][filename]={'res':temp_vo, 'cache_pos':cache_pos, 'usetime':1}
             except:
                 pass
@@ -1329,7 +1327,7 @@ class SelectList(object):
             draw_image(self.blackbg,img_mask=self.blackbg_mask,img_origin=(0,0),on_canvas=False)
             draw_image(self.highlightimg,img_mask=self.highlightimg_mask,img_origin=(0,self.highlightpos*screensize[1]//4),on_canvas=False)
         for i in range(self.startpos,self.endpos+1):
-            if self.iconlist!=None:
+            if self.iconlist:
                 if gameconfig[u'platform']==u'pygame':
                     draw_image(self.iconlist[i],img_origin=(1,screensize[1]/8-get_image_height(self.iconlist[i])/2+(i-self.startpos)*screensize[1]/4),on_canvas=False)
                 else:
@@ -1592,10 +1590,7 @@ class Album(object):
             line=configfile.readline()
             if len(line)==0:
                 break
-            if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-                command=line[3:].decode('utf8')
-            else:
-                command=line.decode('utf8')
+            command=line.decode('utf-8-sig')
             args=del_blank(command[:-1]).split(',')
             if args[0].isdigit():
                 if len(self.album)<=int(args[0])-1:
@@ -1632,7 +1627,8 @@ class Album(object):
             for i in range( 0,len(self.album[pagenum]) ):
                 line=i//5
                 col=i%5
-                self.cvThumb=load_image(os.path.join(GAME_PATH,'bg',(self.album[pagenum][i]['filename'][0].encode('utf8'))+gameconfig[u'bgformat']), width=screensize[0]*17/100, height=screensize[1]*17/100)
+                bg_filename = unpack_file(self.album[pagenum][i]['filename'][0],u'bgformat')
+                self.cvThumb=load_image(bg_filename, width=screensize[0]*17/100, height=screensize[1]*17/100)
                 if gameconfig[u'platform']==u'pygame':
                     self.albumbg.blit( self.cvThumb, (screensize[0]*(3+19*col)/100,screensize[1]*(2+19*line)/100))
                 else:
@@ -2093,17 +2089,19 @@ def message_before(name=None):
         draw_text(name,nametext_origin,color=gameconfig[u'textcolor'],on_canvas=False)
     update_screen()
 
-def read_game_config(gamefolder):
-    global gameconfig,save
-    gameconfigfile=file(os.path.join(gamefolder,'gameconfig.txt'),'r')
+def read_game_config():
+    global gameconfig,save,SAVE_PATH,GAME_PATH
+    config_path = os.path.join(SAVE_PATH,'gameconfig.sav')
+    if os.path.exists(config_path):
+        gameconfigfile=file(config_path,'r')
+    else:
+        # Read the original gameconfig.txt
+        gameconfigfile=file(os.path.join(GAME_PATH,'gameconfig.txt'),'r')
     while True:
         line=gameconfigfile.readline()
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         if command.startswith('#'):
             continue
         args=command.split(',')
@@ -2129,12 +2127,11 @@ def read_global_config(configfilename):
         line=gameconfigfile.readline()
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         args=command.split(',')
         if args[0]==u'last_path':
+            retdict[args[0]]=args[1]
+        elif args[0]==u'save_path':
             retdict[args[0]]=args[1]
         else:
             retdict[args[0]]=int(args[1])
@@ -2142,26 +2139,31 @@ def read_global_config(configfilename):
     return retdict
 
 def write_game_config():
-    global gameconfig, save
-    gameconfigfile=file(os.path.join(GAME_PATH,'gameconfig.txt'),'w')
-    gameconfigfile.write(codecs.BOM_UTF8)
-    for entry in gameconfig:
-        entrytype=type(gameconfig[entry])
-        if entrytype==str or entrytype==unicode:
-            gameconfigfile.write((entry+','+gameconfig[entry]+'\r\n').encode('utf8'))
-        elif entrytype==tuple:
-            if entry==u'textcolor':
-                gameconfigfile.write((entry+',#'+hex(gameconfig[entry][0]*256*256+gameconfig[entry][1]*256+gameconfig[entry][2])[2:]+'\r\n').encode('utf8'))
-            else:
-                gameconfigfile.write((entry+','+str(gameconfig[entry][0])+','+str(gameconfig[entry][1])+'\r\n').encode('utf8'))
-        elif entrytype==int:
-            gameconfigfile.write((entry+','+str(gameconfig[entry])+'\r\n').encode('utf8'))
-    gameconfigfile.close()
+    global gameconfig, save, SAVE_PATH
+    try:
+        gameconfigfile=file(os.path.join(SAVE_PATH,'gameconfig.sav'),'wb')
+        gameconfigfile.write(codecs.BOM_UTF8)
+        for entry in gameconfig:
+            entrytype=type(gameconfig[entry])
+            entry_text = None
+            if entrytype==str or entrytype==unicode:
+                entry_text = entry+','+gameconfig[entry]
+            elif entrytype==tuple:
+                if entry==u'textcolor':
+                    entry_text = entry+',#'+hex(gameconfig[entry][0]*256*256+gameconfig[entry][1]*256+gameconfig[entry][2])[2:]
+                else:
+                    entry_text = entry+','+str(gameconfig[entry][0])+','+str(gameconfig[entry][1])
+            elif entrytype==int:
+                entry_text = entry+','+str(gameconfig[entry])
+            if entry_text:
+                gameconfigfile.write((entry_text+'\r\n').encode('utf-8'))
+        gameconfigfile.close()
+    except:
+        error_log(traceback.format_exc())
     save_global()
 
 def CHAload(chaindex, chafilename):
     global chara, screensize, cache, save, gameconfig
-    #print "chaindex",chaindex
     chara[chaindex]={}
     if not save[u'chara'].has_key(chaindex):
         save[u'chara'][chaindex]={}
@@ -2176,13 +2178,13 @@ def CHAload(chaindex, chafilename):
         if cache['chara'][chafilename]['usetime']==0:
             del cache['chara'][chafilename]
     else:
-        unpack_file(chafilename,u'charaformat')
+        full_filename = unpack_file(chafilename,u'charaformat')
         if gameconfig[u'platform']==u'pygame':
-            chara[chaindex]['chara_img']=load_image(os.path.join(GAME_PATH,'chara',(chafilename.encode('utf8'))+gameconfig[u'charaformat']),is_alpha=True)
+            chara[chaindex]['chara_img']=load_image(full_filename,is_alpha=True)
         else:
-            unpack_file(chafilename+u'_mask',u'charamaskformat')
-            chara[chaindex]['chara_img']=load_image(GAME_PATH+u'chara\\'+chafilename+gameconfig[u'charaformat'])
-            chara[chaindex]['chara_mask']=load_image(GAME_PATH+u'chara\\'+chafilename+'_mask'+gameconfig[u'charamaskformat'], is_mask=True)
+            full_maskname = unpack_file(chafilename+u'_mask',u'charaformat')
+            chara[chaindex]['chara_img']=load_image(full_filename)
+            chara[chaindex]['chara_mask']=load_image(full_maskname, is_mask=True)
     save[u'chara'][chaindex]['chara_visible']=False
 
 def CHADisp(transition=u'ALPHA',length=300):
@@ -2245,14 +2247,12 @@ def Save():
     ALPHA(300, staticimg['oldimg'])
 
 def ScreenShot(mode):
-    global GAME_PATH, staticimg, gameconfig
-    if not os.path.exists(os.path.join(GAME_PATH,'save')):
-        os.makedirs(os.path.join(GAME_PATH,'save'))
+    global SAVE_PATH, staticimg, gameconfig, chinese_encoding
     #find next available filename
     i=0
-    while os.path.exists(os.path.join(GAME_PATH,'save','screenshot'+str(i)+'.png')):
+    while os.path.exists(os.path.join(SAVE_PATH,'screenshot'+str(i)+'.png')):
         i+=1
-    shotfilename=os.path.join(GAME_PATH,'save','screenshot'+str(i)+'.png')
+    shotfilename=os.path.join(SAVE_PATH,'screenshot'+str(i)+'.png')
     if mode==0:
         ret=save_image(staticimg['bg'],shotfilename)
     elif mode==1:
@@ -2263,9 +2263,9 @@ def ScreenShot(mode):
         return
     if ret:
         if gameconfig[u'platform']==u'pygame':
-            query(stringres[u'HINT'],stringres[u'SCREENSHOT_4']+shotfilename.encode('utf8'),[stringres[u'OK']])
+            query(stringres[u'HINT'],stringres[u'SCREENSHOT_4']+shotfilename.decode(chinese_encoding),[stringres[u'OK']])
         else:
-            appuifw.note(stringres[u'SCREENSHOT_4']+shotfilename,'conf')#save complete
+            appuifw.note(stringres[u'SCREENSHOT_4']+shotfilename.decode(chinese_encoding),'conf')#save complete
 
 #=========================================================
 #                Platform independent code
@@ -2280,10 +2280,7 @@ class Musicbox(object):
             line=configfile.readline()
             if len(line)==0:
                 break
-            if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-                command=line[3:].decode('utf8')
-            else:
-                command=line.decode('utf8')
+            command=line.decode('utf-8-sig')
             args=del_blank(command[:-1]).split(',')
             if len(args)==2:
                 self.musictitlelist.append(args[1])
@@ -2668,10 +2665,7 @@ def ChangeTitle(title_index):
         line=configfile.readline()
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         args=command.split(',')
         if args[0]==title_index:
             save[u'title']=args[1]
@@ -2687,10 +2681,8 @@ def auto_save():
         save_index(0)
 
 def save_index(save_index):
-    global f, save, anime
-    if not os.path.exists(os.path.join(GAME_PATH,'save')):
-        os.makedirs(os.path.join(GAME_PATH,'save'))
-    savefile=file(os.path.join(GAME_PATH,'save',str(save_index)+'.sav'),'w')
+    global f, save, anime, SAVE_PATH
+    savefile=file(os.path.join(SAVE_PATH,str(save_index)+'.sav'),'wb')
     savefile.write(codecs.BOM_UTF8)
     savefile.write((os.path.basename(f.name)+'\n').encode('utf8'))
     savefile.write((str(save[u'linenum'])+'\n').encode('utf8'))
@@ -2739,10 +2731,8 @@ def save_index(save_index):
 
 def load_index(save_index):
     #if load succeeded, return true
-    global f, save, gameconfig, anime, GAME_PATH
-    if not os.path.exists(os.path.join(GAME_PATH,'save')):
-        os.makedirs(os.path.join(GAME_PATH,'save'))
-    savepath=os.path.join(GAME_PATH,'save',str(save_index)+'.sav')
+    global f, save, gameconfig, anime, SAVE_PATH
+    savepath=os.path.join(SAVE_PATH,str(save_index)+'.sav')
     if not os.path.exists(savepath):
         return False
     if anime.ison():
@@ -2844,8 +2834,8 @@ def load_index(save_index):
     return True
 
 def save_global():
-    global f, globalsave, save
-    savefile=file(os.path.join(GAME_PATH,'save','global.sav'),'w')
+    global f, globalsave, save, SAVE_PATH
+    savefile=file(os.path.join(SAVE_PATH,'global.sav'),'wb')
     savefile.write(codecs.BOM_UTF8)
     #write evflag
     for flag in globalsave[u'evflag']:
@@ -2869,10 +2859,10 @@ def save_global():
     
 def load_global():
     #if load succeeded, return true
-    global f, globalsave, save
+    global f, globalsave, save, SAVE_PATH
     try:
         globalsave={}
-        savefile=file(os.path.join(GAME_PATH,'save','global.sav'),'r')
+        savefile=file(os.path.join(SAVE_PATH,'global.sav'),'r')
         line=savefile.readline()
         #read evflag
         globalsave[u'evflag']=line[3:].decode('utf8')[:-2].split(',')
@@ -2901,12 +2891,12 @@ def purge_variable():
     load_global()
     
 def read_save_list(startsaveslot, saveslotnum):
-    global screensize, gameconfig, stringres
+    global screensize, gameconfig, stringres, SAVE_PATH
     savelist=[]
     latestsavetime=0
     latestsave=0
     for i in range(startsaveslot,saveslotnum+1):
-        savepath=os.path.join(GAME_PATH,'save',str(i)+'.sav')
+        savepath=os.path.join(SAVE_PATH,str(i)+'.sav')
         if os.path.exists(savepath):
             try:
                 savefile=file(savepath,'r')
@@ -3052,20 +3042,18 @@ def get_game_date():
     return (0,0)
 
 def read_game_info(gamefolder):
-    gameconfigfile=file(os.path.join(gamefolder,'gameconfig.txt'),'r')
+    global chinese_encoding
+    gameconfigfile=file(os.path.join(gamefolder.decode(chinese_encoding),'gameconfig.txt'),'r')
     while True:
         line=gameconfigfile.readline()
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=line[3:].decode('utf8')
-        else:
-            command=line.decode('utf8')
+        command=line.decode('utf-8-sig')
         args=del_blank(command).split(',')
         if args[0]==u'gametitle':
             gametitle=args[1]
     gameconfigfile.close()
-    return (gamefolder,gametitle)
+    return (gamefolder.decode(chinese_encoding),gametitle)
 
 def SetEVFlag(bgfilename):
     global globalsave
@@ -3185,10 +3173,7 @@ def jump_to_label(position):
             save[u'linenum']=0
             line=f.readline()
             save[u'linenum']+=1
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         if command.startswith(u'#label '):
             if position==del_blank(command[7:]):
                 break
@@ -3213,62 +3198,49 @@ def Auto_Play(pos=(0,0)):
         else:
             load_keypad(autoon=False)
 
+# returns the location of the extracted file
 def unpack_file(filename, filetype):
-    global voindex,vopakfile,seindex,sepakfile,bgindex,bgpakfile,charaindex,charapakfile,GAME_PATH, gameconfig
-    filename=filename.upper()
-    #if gameconfig[u'platform']==u'pygame':
-    #    destfilename=filename.lower()
-    #else:
-    destfilename=filename
+    global voindex,vopakfile,seindex,sepakfile,bgindex,bgpakfile,charaindex,charapakfile,GAME_PATH,SAVE_PATH,gameconfig,chinese_encoding
+    destfilename=filename.upper()
     if filetype==u'bgformat':
-        if bgpakfile==None:
-            return
-        if bgindex.has_key(filename):
-            try:
-                tempfile=file(os.path.join(GAME_PATH,'bg',(destfilename.encode('utf8'))+gameconfig[filetype]),'wb')
-                bgpakfile.seek(bgindex[filename][0])
-                tempfile.seek(0)
-                tempfile.write(bgpakfile.read(bgindex[filename][1]))
-                tempfile.close()
-            except:
-                print 'Error while unpacking bg resource. Memory card full?'
-    if filetype==u'charaformat' or filetype==u'charamaskformat':
-        if charapakfile==None:
-            return
-        if charaindex.has_key(filename):
-            try:
-                tempfile=file(os.path.join(GAME_PATH,'chara',(destfilename.encode('utf8'))+gameconfig[filetype]),'wb')
-                charapakfile.seek(charaindex[filename][0])
-                tempfile.seek(0)
-                tempfile.write(charapakfile.read(charaindex[filename][1]))
-                tempfile.close()
-            except:
-                print 'Error while unpacking chara resource. Memory card full?'
-    if filetype==u'voiceformat':
-        if vopakfile==None:
-            return
-        if voindex.has_key(filename):
-            try:
-                tempfile=file(os.path.join(GAME_PATH,'voice',(destfilename.encode('utf8'))+gameconfig[filetype]),'wb')
-                vopakfile.seek(voindex[filename][0])
-                tempfile.seek(0)
-                tempfile.write(vopakfile.read(voindex[filename][1]))
-                tempfile.close()
-            except:
-                print 'Error while unpacking voice resource. Memory card full?'
-    if filetype==u'seformat':
-        if sepakfile==None:
-            return
-        if seindex.has_key(filename):
-            try:
-                tempfile=file(os.path.join(GAME_PATH,'se',(destfilename.encode('utf8'))+gameconfig[filetype]),'wb')
-                sepakfile.seek(seindex[filename][0])
-                tempfile.seek(0)
-                tempfile.write(sepakfile.read(seindex[filename][1]))
-                tempfile.close()
-            except:
-                print 'Error while unpacking se resource. Memory card full?'
-
+        pakfile = bgpakfile
+        base_folder = 'bg'
+        pakindex = bgindex
+    elif filetype==u'charaformat' or filetype==u'charamaskformat':
+        pakfile = charapakfile
+        base_folder = 'chara'
+        pakindex = charaindex
+    elif filetype==u'voiceformat':
+        pakfile = vopakfile
+        base_folder = 'voice'
+        pakindex = voindex
+    elif filetype==u'seformat':
+        pakfile = sepakfile
+        base_folder = 'se'
+        pakindex = seindex
+    else:
+        return ''
+    if pakfile==None:
+        full_filename = os.path.join(GAME_PATH,base_folder,(destfilename.encode(chinese_encoding))+gameconfig[filetype])
+        if os.path.exists(full_filename):
+            return full_filename
+        else:
+            return ''
+    if pakindex.has_key(destfilename):
+        try:
+            temp_path = os.path.join(SAVE_PATH, 'temp', base_folder)
+            if not os.path.exists(temp_path):
+              os.makedirs(temp_path)
+            full_filename = os.path.join(temp_path,(destfilename.encode(chinese_encoding))+gameconfig[filetype])
+            tempfile=file(full_filename,'wb')
+            pakfile.seek(pakindex[destfilename][0])
+            tempfile.seek(0)
+            tempfile.write(pakfile.read(pakindex[destfilename][1]))
+            tempfile.close()
+            return full_filename
+        except:
+            print 'Error while unpacking '+base_folder+' resource.', traceback.format_exc()
+    return ''
 
 def rename_files(basepath):
     for root, dirs, files in os.walk(basepath):
@@ -3320,10 +3292,7 @@ def load_string_res(stringresfilename):
         line=stringresfile.readline()
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=line[3:].decode('utf8')
-        else:
-            command=line.decode('utf8')
+        command=line.decode('utf-8-sig')
         pos=command.find(',')
         if pos==-1:
             print 'load_string_res::No seperator found.'
@@ -3334,32 +3303,46 @@ def load_string_res(stringresfilename):
     stringresfile.close()
     return stringres
 
+# Delete the temp folder used for unpacking files, and pymo.log
+def purge_temp():
+    global SAVE_PATH,LOG_PATH
+    try:
+        os.remove(LOG_PATH)
+    except:
+        pass
+    try:
+        shutil.rmtree(os.path.join(SAVE_PATH, 'temp'))
+    except:
+        pass
+
 def purge_voice(isexit=False):
-    global GAME_PATH,gameconfig,vopakfile
+    global gameconfig,vopakfile,SAVE_PATH
     VO_STP()
-    if vopakfile==None or( not os.path.exists(os.path.join(GAME_PATH,'voice'))):
+    temp_path = os.path.join(SAVE_PATH, 'temp', 'voice')
+    if vopakfile==None or( not os.path.exists(temp_path)):
         return
-    voicefiles=os.listdir(os.path.join(GAME_PATH,'voice'))
+    voicefiles=os.listdir(temp_path)
     for voicefilename in voicefiles:
         if voicefilename.endswith(gameconfig[u'voiceformat']):
             if isexit or (not cache['vo'].has_key(voicefilename[:-len(gameconfig[u'voiceformat'])])):
                 try:
-                    os.remove(os.path.join(GAME_PATH,'voice',(voicefilename.encode('utf8'))))
+                    os.remove(os.path.join(temp_path,(voicefilename.encode('utf8'))))
                 except:
                     #print 'Error while deleting',voicefilename
                     pass
 
 def purge_image(isexit=False,timelimit=0):
-    global GAME_PATH,gameconfig,bgpakfile,charapakfile,sepakfile
+    global SAVE_PATH,gameconfig,bgpakfile,charapakfile,sepakfile
     if timelimit!=0:
         start_time=time.time()
         end_time=start_time + float(timelimit)/1000.0
-    if bgpakfile!=None:
-        voicefiles=os.listdir(os.path.join(GAME_PATH,'bg'))
+    temp_path = os.path.join(SAVE_PATH, 'temp', 'bg')
+    if bgpakfile!=None and os.path.exists(temp_path):
+        voicefiles=os.listdir(temp_path)
         for voicefilename in voicefiles:
             if voicefilename.endswith(gameconfig[u'bgformat']):
                 try:
-                    os.remove(os.path.join(GAME_PATH,'bg',(voicefilename.encode('utf8'))))
+                    os.remove(os.path.join(temp_path,(voicefilename.encode('utf8'))))
                 except:
                     #print 'Error while deleting',voicefilename
                     pass
@@ -3367,25 +3350,26 @@ def purge_image(isexit=False,timelimit=0):
                     return
         if isexit:
             bgpakfile.close()
-    if charapakfile!=None:
-        voicefiles=os.listdir(os.path.join(GAME_PATH,'chara'))
+    temp_path = os.path.join(SAVE_PATH, 'temp', 'chara')
+    if charapakfile!=None and os.path.exists(temp_path):
+        voicefiles=os.listdir(temp_path)
         for voicefilename in voicefiles:
             if voicefilename.endswith(gameconfig[u'charaformat']) or voicefilename.endswith(gameconfig[u'charamaskformat']):
                 try:
-                    os.remove(os.path.join(GAME_PATH,'chara',(voicefilename.encode('utf8'))))
+                    os.remove(os.path.join(temp_path,(voicefilename.encode('utf8'))))
                 except:
-                    #print 'Error while deleting',voicefilename
                     pass
                 if timelimit!=0 and end_time < time.time():
                     return
         if isexit:
             charapakfile.close()
-    if isexit and sepakfile!=None:
-        voicefiles=os.listdir(os.path.join(GAME_PATH,'se'))
+    temp_path = os.path.join(SAVE_PATH, 'temp', 'se')
+    if isexit and sepakfile!=None and os.path.exists(temp_path):
+        voicefiles=os.listdir(temp_path)
         for voicefilename in voicefiles:
             if voicefilename.endswith(gameconfig[u'seformat']):
                 try:
-                    os.remove(os.path.join(GAME_PATH,'se',(voicefilename.encode('utf8'))))
+                    os.remove(os.path.join(temp_path,(voicefilename.encode('utf8'))))
                 except:
                     #print 'Error while deleting',voicefilename
                     pass
@@ -3420,7 +3404,7 @@ def PrefetchingMO1():
         cache_pos=f.tell()
         if len(line)==0:
             break
-        command=line.decode('utf8')
+        command=line.decode('utf-8-sig')
         #bg
         if command.startswith(u'#bg '):
             args=command[4:-1].split(',')
@@ -3481,7 +3465,7 @@ def PrefetchingMO2():
         cache_pos=f.tell()
         if len(line)==0:
             break
-        command=line.decode('utf8')
+        command=line.decode('utf-8-sig')
         #bg
         if command.startswith(u'#BG_DSP '):
             args=del_blank(command[8:-1]).split(',')
@@ -3560,7 +3544,7 @@ def PrefetchingPYMO():
         cache_pos=f.tell()
         if len(line)==0:
             break
-        command=line.decode('utf8')
+        command=line.decode('utf-8-sig')
         #bg
         if command.startswith(u'#bg '):
             args=split_parameter(command,u'#bg ')
@@ -3659,10 +3643,7 @@ def ScriptParseMO1():
         save[u'linenum']+=1
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         #change  
         if command.startswith(u'#change '):
             args=split_parameter(command,u'#change ')
@@ -3987,10 +3968,7 @@ def ScriptParseMO2():
         save[u'linenum']+=1
         if len(line)==0:
             break
-        if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-            command=del_blank(line[3:].decode('utf8'))
-        else:
-            command=del_blank(line.decode('utf8'))
+        command=del_blank(line.decode('utf-8-sig'))
         #GOTO_ENDING 
         if command.startswith(u'#GOTO_ENDING'):
             args=split_parameter(command,u'#GOTO_ENDING')
@@ -4392,10 +4370,7 @@ def ScriptParsePYMO():
         try:
             if len(line)==0:
                 break
-            if len(line)>3 and line[:3] == codecs.BOM_UTF8:
-                command=del_blank(line[3:].decode('utf8'))
-            else:
-                command=del_blank(line.decode('utf8'))
+            command=del_blank(line.decode('utf-8-sig'))
             #change  
             if command.startswith(u'#change '):
                 change_script(del_blank(command[8:]))
@@ -4857,25 +4832,25 @@ def ScriptParsePYMO():
 #Following is main function
 
 def main(platform='android'):
-    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,globalconfig,gameconfig,gameconfigbak,save,GAME_PATH,LOG_PATH,chara_on,f,sfx,bgmstart,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres,chinese_encoding
+    global scalemode,scaleratio,keyboard,canvas,screensize,bgsize,final_img,staticimg,running,globalconfig,gameconfig,gameconfigbak,save,GAME_PATH,SAVE_PATH,LOG_PATH,chara_on,f,sfx,bgmstart,bgmloop,vo,chara,cache,cache_pos,withname,in_fade_out,auto_play,fade_out_color,messagelog,vopakfile,voindex,seindex,sepakfile,bgpakfile,bgindex,charapakfile,charaindex,autosave,anime,quitbind,background,stringres,chinese_encoding
     final_img=None
     staticimg={'keypad':None}
     background=False
     sfx=None
     bgmstart=time.time()
+    gameconfigbak = {}
+    bgmloop=False
     vo=None
     f=None
     quitbind=True
     autosave=0
-    engineversion=1.1
+    engineversion=1.2
     gameconfig={u'font':1,u'fontaa':1,u'grayselected':1,u'hint':1,u'textspeed':3,u'textcolor':(255,255,255),u'cgprefix':u'EV_',
                 u'vovolume':0,u'bgmvolume':0,u'msgtb':(6,0),u'msglr':(10,7),u'anime':1,u'platform':'pygame',u'namealign':'middle'}
-    gameconfigbak={}
     GAME_PATH=None
-    RES_PATH=u''
     #find LOG_PATH
     paths=os.getcwd()
-    LOG_PATH=os.path.join(paths,'pymo.log')
+    LOG_PATH = os.path.join(paths,'pymo.log')
     if android:
         platform='android'
     try:
@@ -4893,7 +4868,7 @@ def main(platform='android'):
             scalemode=2
             screensize=(593,360)
             canvas = pygame.display.set_mode(screensize,pygame.HWSURFACE)
-            pygame.display.set_caption('pymo '+str(engineversion)+' by chen_xin_ming')
+            pygame.display.set_caption('pymo '+str(engineversion))
             chinese_encoding = 'gbk'
         elif platform=='maemo' or platform=='meego':
             scalemode=1
@@ -4934,7 +4909,8 @@ def main(platform='android'):
         # if on android, use android launcher, else use pymo launcher
         # ####################
         if platform=='android':
-            GAME_PATH=globalconfig['last_path'].encode("utf8")
+            GAME_PATH = globalconfig['last_path'].encode(chinese_encoding)
+            SAVE_PATH = globalconfig['save_path'].encode(chinese_encoding)
         else:
             gamelist=[]
             gametextlist=[]
@@ -4966,29 +4942,30 @@ def main(platform='android'):
             del gametextlist
             del gamelauncher
             GAME_PATH=gamelist[gameid]
+            SAVE_PATH =os.path.join(paths,'save',os.path.basename(GAME_PATH)).encode(chinese_encoding)
+        #remove the log file in SD card's root dir
+        try:
+            os.remove(LOG_PATH)
+        except:
+            pass
+        LOG_PATH=os.path.join(SAVE_PATH.decode(chinese_encoding),'pymo.log').encode(chinese_encoding)
+        #see if game folder allows write
+        try:
+            if not os.path.exists(SAVE_PATH):
+                os.makedirs(SAVE_PATH)
+        except IOError:
+            print traceback.format_exc()
+            query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
         #read the selected game config
         try:
-            read_game_config(GAME_PATH)
+            read_game_config()
         except:
             error_log(traceback.format_exc())
             query(stringres[u'ERROR'],'gameconfig.txt '+stringres[u'IS_BROKEN'],[stringres[u'OK']])
             error_log("Error: "+ GAME_PATH+'/gameconfig.txt '+'is corrupted')
             pygame.quit()
             return
-        #remove the log file in SD card's root dir
-        try:
-            os.remove(LOG_PATH)
-        except:
-            pass
-        LOG_PATH=os.path.join(GAME_PATH,'pymo.log')
-        #see if game folder allows write
-        try:
-            tempfile=file(LOG_PATH,'w')
-            tempfile.close()
-            if not os.path.exists(os.path.join(GAME_PATH,'save')):
-                os.makedirs(os.path.join(GAME_PATH,'save'))
-        except IOError:
-            query(stringres[u'WARNING'],stringres[u'READ_ONLY'],[stringres[u'OK']])
+
         chara_on=False
 
         if gameconfig.has_key(u'engineversion'):
@@ -5065,7 +5042,6 @@ def main(platform='android'):
             BGLoad(0,'logo1')
             BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
         else:
-            e32.ao_sleep(0.8)
             BGLoad(0,'logo2')
             BGDisp(0, transition=u'BG_ALPHA', speed=u'BG_NORMAL')
         Load_system_images()
@@ -5095,7 +5071,7 @@ def main(platform='android'):
             purge_image(True)
             if vopakfile!=None:
                 vopakfile.close()
-            os.remove(LOG_PATH)
+            purge_temp()
         except:
             pass
     except:

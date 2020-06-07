@@ -29,6 +29,7 @@ public class Config extends Activity
 	private int set_keypad_extend = 0;
 	private int set_keypad_horizontal = 1;
 	private String set_last_path;
+	private String set_save_path;
 	private String line_read;
 
     private ResourceManager resourceManager;
@@ -102,6 +103,7 @@ public class Config extends Activity
 		try {
 			fw = new FileWriter(globalconfigpath);
 			fw.write("last_path,"+set_last_path+"\r\n");
+			fw.write("save_path,"+set_save_path+"\r\n");
 			fw.write("executed_time,"+set_executed_time+"\r\n");
 			fw.write("original_ratio,"+set_original_ratio+"\r\n");
 			fw.write("keypad_extend,"+set_keypad_extend+"\r\n");
@@ -122,6 +124,7 @@ public class Config extends Activity
 				while (line_read != null){
 					String[] sArray=line_read.split(",");
 					if (sArray[0].equals("last_path")) set_last_path =sArray[1];
+					else if (sArray[0].equals("save_path")) set_save_path =sArray[1];
 					else if (sArray[0].equals("executed_time")) set_executed_time = Integer.parseInt(sArray[1]);
 					else if (sArray[0].equals("original_ratio")) set_original_ratio=Integer.parseInt(sArray[1]);
 					else if (sArray[0].equals("keypad_extend")) set_keypad_extend=Integer.parseInt(sArray[1]);

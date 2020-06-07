@@ -18,7 +18,7 @@
 <string name="text_button_resume">Resume Download</string>
 <string name="text_button_cancel">Cancel</string>
 
-<string name="info">pymo 1.2\nby chen_xin_ming\n\n更新内容：\n- 修复高版本Android闪退问题\n\n欢迎访问官方网站了解详情和下载游戏：http://www.pymogames.com</string>
+<string name="info">pymo 1.2\nby chen_xin_ming\n\n使用方法：\n将游戏数据包解压并放入手机存储中，然后在pymo里找到游戏所在的文件夹，点击即可开始游戏\n\n更新内容：\n- 修复Android 7.0以上的闪退问题\n- 支持外置SD卡游戏读取\n- 存档路径改到内置存储上的Android/data/com.pymo.pymo/files/save\n- 提高Android TV和手柄的兼容性\n- 修复自动播放时不等待语音的问题\n- 修复bgm不循环播放的问题\n\n欢迎访问官方网站了解详情和下载游戏：http://www.pymogames.com</string>
     <string name="info_title">关于 pymo 1.2</string>
     <string name="title_activity_file_chooser">FileChooser</string>
     <string name="action_settings">Settings</string>

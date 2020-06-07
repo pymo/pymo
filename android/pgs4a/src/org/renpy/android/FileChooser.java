@@ -50,6 +50,8 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
     private int set_keypad_extend = 1;
     private int set_keypad_horizontal = 1;
     private String set_last_path = "";
+    private String save_path_base = "";
+    private String save_path = "/";
     private String line_read;
     private SimpleAdapter listItemAdapter;
     private ArrayList < HashMap < String, Object >> listItems;
@@ -196,7 +198,6 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
         }
         set_executed_time++;
         WriteSetting(getFilesDir() + "/globalconfig.txt");
-
     }
 
     public void onItemClick(AdapterView <?> parent, View v, int position, long id) {
@@ -230,6 +231,12 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
         } else {
             gCurrentDirectoryPath = mCurrentDirectory.getPath();
             set_last_path = gCurrentDirectoryPath;
+            File save_path_file = new File(save_path_base, mCurrentDirectory.getName());
+            if (!save_path_file.exists()) {
+                save_path_file.mkdirs();
+            }
+
+	    save_path = save_path_file.getPath();
 
             String gameconfigPath = gCurrentDirectoryPath + "/gameconfig.txt";
             File gameconfig = new File(gameconfigPath);
@@ -257,6 +264,7 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
                 }
             }
             unpack_file(gCurrentDirectoryPath + "/bg/bg.pak", "logo1", extension);
+            WriteSetting(getFilesDir() + "/globalconfig.txt");
 
             Intent intent = new Intent();
             intent.setClassName(getPackageName(), "org.renpy.android.PythonActivity");
@@ -320,6 +328,7 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
         try {
             fw = new FileWriter(globalconfigpath);
             fw.write("last_path," + set_last_path + "\r\n");
+            fw.write("save_path," + save_path + "\r\n");
             fw.write("executed_time," + set_executed_time + "\r\n");
             fw.write("original_ratio," + set_original_ratio + "\r\n");
             fw.write("keypad_extend," + set_keypad_extend + "\r\n");
@@ -342,6 +351,7 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
                     Log.v("FileChooser", line_read);
                     if (sArray.length < 2) break;
                     if (sArray[0].equals("last_path")) set_last_path = sArray[1];
+		    // Don't load save_path, it's generated when the game is executed.
                     else if (sArray[0].equals("executed_time")) set_executed_time = Integer.parseInt(sArray[1]);
                     else if (sArray[0].equals("original_ratio")) set_original_ratio = Integer.parseInt(sArray[1]);
                     else if (sArray[0].equals("keypad_extend")) set_keypad_extend = Integer.parseInt(sArray[1]);
@@ -383,16 +393,19 @@ public class FileChooser extends Activity implements AdapterView.OnItemClickList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+        //if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
             // For Kitkat and above, create a app directory on each of the external storage
-            File[] appDirs = getExternalFilesDirs(null);
-            for (File d: appDirs) {
-                File f = new File(d, "Games");
-                if (!f.exists()) {
-                    f.mkdirs();
-                }
+            File d = getExternalFilesDir(null);
+            File f = new File(d, "Games");
+            if (!f.exists()) {
+                f.mkdirs();
             }
-        }
+            File s = new File(d, "save");
+            if (!s.exists()) {
+                s.mkdirs();
+            }
+	    save_path_base = s.getPath();
+       //}
 
         runLauncher();
     }

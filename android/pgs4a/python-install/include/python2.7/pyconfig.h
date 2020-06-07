@@ -239,7 +239,7 @@
 #define HAVE_FSEEKO 1
 
 /* Define to 1 if you have the `fstatvfs' function. */
-#define HAVE_FSTATVFS 1
+/* #undef HAVE_FSTATVFS */
 
 /* Define if you have the 'fsync' function. */
 #define HAVE_FSYNC 1
@@ -333,7 +333,7 @@
 #define HAVE_GETRESUID 1
 
 /* Define to 1 if you have the `getsid' function. */
-#define HAVE_GETSID 1
+/* #undef HAVE_GETSID */
 
 /* Define to 1 if you have the `getspent' function. */
 /* #undef HAVE_GETSPENT */
@@ -432,7 +432,7 @@
 #define HAVE_LINUX_NETLINK_H 1
 
 /* Define to 1 if you have the <linux/tipc.h> header file. */
-#define HAVE_LINUX_TIPC_H 1
+/* #undef HAVE_LINUX_TIPC_H */
 
 /* Define to 1 if you have the `log1p' function. */
 #define HAVE_LOG1P 1
@@ -456,7 +456,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mkfifo' function. */
-#define HAVE_MKFIFO 1
+/* #undef HAVE_MKFIFO */
 
 /* Define to 1 if you have the `mknod' function. */
 #define HAVE_MKNOD 1
@@ -651,7 +651,7 @@
 #define HAVE_SSIZE_T 1
 
 /* Define to 1 if you have the `statvfs' function. */
-#define HAVE_STATVFS 1
+/* #undef HAVE_STATVFS */
 
 /* Define if you have struct stat.st_mtim.tv_nsec */
 /* #undef HAVE_STAT_TV_NSEC */
@@ -769,7 +769,7 @@
 #define HAVE_SYS_SOCKET_H 1
 
 /* Define to 1 if you have the <sys/statvfs.h> header file. */
-#define HAVE_SYS_STATVFS_H 1
+/* #undef HAVE_SYS_STATVFS_H */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
@@ -817,7 +817,7 @@
 /* #undef HAVE_THREAD_H */
 
 /* Define to 1 if you have the `timegm' function. */
-#define HAVE_TIMEGM 1
+/* #undef HAVE_TIMEGM */
 
 /* Define to 1 if you have the `times' function. */
 #define HAVE_TIMES 1
@@ -875,7 +875,7 @@
 /* #undef HAVE_WAIT3 */
 
 /* Define to 1 if you have the `wait4' function. */
-#define HAVE_WAIT4 1
+/* #undef HAVE_WAIT4 */
 
 /* Define to 1 if you have the `waitpid' function. */
 #define HAVE_WAITPID 1
@@ -980,43 +980,43 @@
 #define SIZEOF_FLOAT 4
 
 /* The size of `fpos_t', as computed by sizeof. */
-#define SIZEOF_FPOS_T 8
+#define SIZEOF_FPOS_T 4
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 8
+#define SIZEOF_LONG 4
 
 /* The size of `long double', as computed by sizeof. */
-#define SIZEOF_LONG_DOUBLE 16
+#define SIZEOF_LONG_DOUBLE 8
 
 /* The size of `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
 
 /* The size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 8
+#define SIZEOF_OFF_T 4
 
 /* The size of `pid_t', as computed by sizeof. */
 #define SIZEOF_PID_T 4
 
 /* The size of `pthread_t', as computed by sizeof. */
-#define SIZEOF_PTHREAD_T 8
+#define SIZEOF_PTHREAD_T 4
 
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 8
+#define SIZEOF_SIZE_T 4
 
 /* The size of `time_t', as computed by sizeof. */
-#define SIZEOF_TIME_T 8
+#define SIZEOF_TIME_T 4
 
 /* The size of `uintptr_t', as computed by sizeof. */
-#define SIZEOF_UINTPTR_T 8
+#define SIZEOF_UINTPTR_T 4
 
 /* The size of `void *', as computed by sizeof. */
-#define SIZEOF_VOID_P 8
+#define SIZEOF_VOID_P 4
 
 /* The size of `wchar_t', as computed by sizeof. */
 #define SIZEOF_WCHAR_T 4
